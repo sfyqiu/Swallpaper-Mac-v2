@@ -41,6 +41,42 @@ class SettingsViewModel: ObservableObject {
     @Published var pexelsApiKey: String = "" { didSet { UserDefaults.standard.set(pexelsApiKey, forKey: "pexels_api_key") } }
     @Published var nasaApiKey: String = "" { didSet { UserDefaults.standard.set(nasaApiKey, forKey: "nasa_api_key") } }
     @Published var coverrApiKey: String = "" { didSet { UserDefaults.standard.set(coverrApiKey, forKey: "coverr_api_key") } }
+
+    // MARK: - API 测试状态
+    @Published var isTestingAPI: Bool = false
+    @Published var apiTestResults: [(name: String, success: Bool, message: String)] = []
+
+    func testAllAPIs() async {
+        isTestingAPI = true
+        apiTestResults = []
+        defer { isTestingAPI = false }
+
+        let results = await withTaskGroup(of: (String, Bool, String).self) { group in
+            group.addTask { @MainActor in
+                let r = await UnsplashService.shared.testConnection()
+                return ("Unsplash", r.success, r.message)
+            }
+            group.addTask { @MainActor in
+                let r = await PexelsService.shared.testConnection()
+                return ("Pexels", r.success, r.message)
+            }
+            group.addTask { @MainActor in
+                let r = await CoverrService.shared.testConnection()
+                return ("Coverr", r.success, r.message)
+            }
+            group.addTask { @MainActor in
+                let r = await NASAService.shared.testConnection()
+                return ("NASA APOD", r.success, r.message)
+            }
+            var collected: [(String, Bool, String)] = []
+            for await result in group {
+                collected.append(result)
+            }
+            return collected
+        }
+        apiTestResults = results
+    }
+
     @Published var proxyEnabled = false { didSet { UserDefaults.standard.set(proxyEnabled, forKey: "proxy_enabled"); syncProxySettings() } }
     @Published var proxyHost: String = "" { didSet { UserDefaults.standard.set(proxyHost, forKey: "proxy_host"); syncProxySettings() } }
     @Published var proxyPort: String = "" { didSet { UserDefaults.standard.set(proxyPort, forKey: "proxy_port"); syncProxySettings() } }

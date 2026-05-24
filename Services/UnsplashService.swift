@@ -72,6 +72,26 @@ final class UnsplashService: ObservableObject {
         return try await search(query: category, page: page)
     }
 
+    // MARK: - API 连通性测试
+    func testConnection() async -> (success: Bool, message: String) {
+        do {
+            let url = URL(string: "\(baseURL)/photos?per_page=1")!
+            let _: [UnsplashPhoto] = try await fetchRaw(url: url)
+            return (true, "Unsplash API 连接成功")
+        } catch {
+            return (false, "连接失败: \(error.localizedDescription)")
+        }
+    }
+
+    private func fetchRaw<T: Codable>(url: URL) async throws -> T {
+        var request = URLRequest(url: url)
+        request.setValue("Client-ID \(accessKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("v1", forHTTPHeaderField: "Accept-Version")
+        request.timeoutInterval = 10
+        let data = try await NetworkService.shared.fetchData(request: request)
+        return try JSONDecoder().decode(T.self, from: data)
+    }
+
     // MARK: - 通用请求
 
     private func fetch<T: Codable>(url: URL) async throws -> T {

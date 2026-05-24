@@ -106,6 +106,25 @@ final class PexelsService: ObservableObject {
 
     // MARK: - 通用
 
+    /// API 连通性测试
+    func testConnection() async -> (success: Bool, message: String) {
+        do {
+            let url = URL(string: "\(baseURL)/v1/curated?per_page=1")!
+            let _: PexelsSearchResponse = try await fetchRaw(url: url)
+            return (true, "Pexels API 连接成功")
+        } catch {
+            return (false, "连接失败: \(error.localizedDescription)")
+        }
+    }
+
+    private func fetchRaw<T: Codable>(url: URL) async throws -> T {
+        var request = URLRequest(url: url)
+        request.setValue(apiKey, forHTTPHeaderField: "Authorization")
+        request.timeoutInterval = 10
+        let data = try await NetworkService.shared.fetchData(request: request)
+        return try JSONDecoder().decode(T.self, from: data)
+    }
+
     private func fetch<T: Codable>(url: URL) async throws -> T {
         var request = URLRequest(url: url)
         request.setValue(apiKey, forHTTPHeaderField: "Authorization")

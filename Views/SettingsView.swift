@@ -360,6 +360,59 @@ private var languageBinding: Binding<LocalizationService.Language> {
                 }
             }
 
+            // API 连通性测试
+            MacSettingsSection {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("API 连通性测试")
+                            .font(.system(size: 13, weight: .semibold))
+                        Spacer()
+                        Button {
+                            Task { await viewModel.testAllAPIs() }
+                        } label: {
+                            HStack(spacing: 4) {
+                                if viewModel.isTestingAPI {
+                                    ProgressView()
+                                        .controlSize(.small)
+                                        .scaleEffect(0.7)
+                                } else {
+                                    Image(systemName: "arrow.clockwise")
+                                        .font(.system(size: 10, weight: .semibold))
+                                }
+                                Text(viewModel.isTestingAPI ? "测试中..." : "测试全部")
+                                    .font(.system(size: 11, weight: .semibold))
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(viewModel.isTestingAPI)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(Capsule(style: .continuous).fill(Color.white.opacity(0.1)))
+                    }
+
+                    if !viewModel.apiTestResults.isEmpty {
+                        VStack(alignment: .leading, spacing: 4) {
+                            ForEach(viewModel.apiTestResults.indices, id: \.self) { idx in
+                                let r = viewModel.apiTestResults[idx]
+                                HStack(spacing: 6) {
+                                    Image(systemName: r.success ? "checkmark.circle.fill" : "xmark.circle.fill")
+                                        .font(.system(size: 11))
+                                        .foregroundStyle(r.success ? Color.green : Color.red)
+                                    Text(r.name)
+                                        .font(.system(size: 11, weight: .medium))
+                                    Text(r.message.replacingOccurrences(of: r.name + " ", with: "").replacingOccurrences(of: "连接成功", with: "").replacingOccurrences(of: "连接失败: ", with: ""))
+                                        .font(.system(size: 10))
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(1)
+                                }
+                            }
+                        }
+                        .padding(.top, 4)
+                    }
+                }
+                .padding(8)
+            }
+
             // Unsplash API Key
             MacSettingsSection {
                 MacSettingsRow(title: "Unsplash Access Key", subtitle: "用于 Unsplash 壁纸源，免费申请 50次/小时", showDivider: false) {
