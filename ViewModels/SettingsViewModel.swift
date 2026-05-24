@@ -40,6 +40,7 @@ class SettingsViewModel: ObservableObject {
     @Published var unsplashAccessKey: String = "" { didSet { UserDefaults.standard.set(unsplashAccessKey, forKey: "unsplash_access_key") } }
     @Published var pexelsApiKey: String = "" { didSet { UserDefaults.standard.set(pexelsApiKey, forKey: "pexels_api_key") } }
     @Published var nasaApiKey: String = "" { didSet { UserDefaults.standard.set(nasaApiKey, forKey: "nasa_api_key") } }
+    @Published var coverrApiKey: String = "" { didSet { UserDefaults.standard.set(coverrApiKey, forKey: "coverr_api_key") } }
     @Published var proxyEnabled = false { didSet { UserDefaults.standard.set(proxyEnabled, forKey: "proxy_enabled"); syncProxySettings() } }
     @Published var proxyHost: String = "" { didSet { UserDefaults.standard.set(proxyHost, forKey: "proxy_host"); syncProxySettings() } }
     @Published var proxyPort: String = "" { didSet { UserDefaults.standard.set(proxyPort, forKey: "proxy_port"); syncProxySettings() } }
@@ -138,6 +139,7 @@ class SettingsViewModel: ObservableObject {
         unsplashAccessKey = defaults.string(forKey: "unsplash_access_key") ?? ""
         pexelsApiKey = defaults.string(forKey: "pexels_api_key") ?? ""
         nasaApiKey = defaults.string(forKey: "nasa_api_key") ?? ""
+        coverrApiKey = defaults.string(forKey: "coverr_api_key") ?? ""
         unsplashAccessKey = defaults.string(forKey: "unsplash_access_key") ?? ""
         pexelsApiKey = defaults.string(forKey: "pexels_api_key") ?? ""
         proxyEnabled = defaults.bool(forKey: "proxy_enabled")

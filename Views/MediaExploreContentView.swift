@@ -330,6 +330,8 @@ struct MediaExploreContentView: View {
             case .dongtai:
                 dongtaiFilterSection
                 dongtaiActiveFiltersSection
+            case .coverr:
+                EmptyView()
             default:
                 EmptyView()
             }
@@ -1077,6 +1079,12 @@ struct MediaExploreContentView: View {
             } else {
                 await viewModel.loadDongTaiFeed()
             }
+        case .coverr:
+            if !query.isEmpty {
+                await viewModel.searchCoverr(query: query)
+            } else {
+                await viewModel.loadCoverrFeed()
+            }
         default:
             if !query.isEmpty {
                 await viewModel.search(query: query)
@@ -1178,6 +1186,8 @@ struct MediaExploreContentView: View {
             await viewModel.loadWorkshopFeed()
         case .dongtai:
             await viewModel.loadDongTaiFeed()
+        case .coverr:
+            await viewModel.loadCoverrFeed()
         default:
             await viewModel.loadHomeFeed()
         }
@@ -1211,6 +1221,8 @@ struct MediaExploreContentView: View {
                 await viewModel.loadWorkshopFeed()
             case .dongtai:
                 await viewModel.loadDongTaiFeed()
+            case .coverr:
+                await viewModel.loadCoverrFeed()
             default:
                 if category == .all {
                     await viewModel.loadHomeFeed()
@@ -1271,6 +1283,8 @@ struct MediaExploreContentView: View {
                 await applyWorkshopFilters(query: query)
             case .dongtai:
                 await viewModel.searchDongTai(query: query)
+            case .coverr:
+                await viewModel.searchCoverr(query: query)
             default:
                 await viewModel.search(query: query)
             }
@@ -1290,8 +1304,8 @@ struct MediaExploreContentView: View {
     private func handleFilterChange() {
         guard !isApplyingProgrammaticReset else { return }
 
-        // Workshop/DongTai 模式下不支持标签过滤
-        if workshopSourceManager.activeSource == .wallpaperEngine || workshopSourceManager.activeSource == .dongtai {
+        // Workshop/DongTai/Coverr 模式下不支持标签过滤
+        if workshopSourceManager.activeSource == .wallpaperEngine || workshopSourceManager.activeSource == .dongtai || workshopSourceManager.activeSource == .coverr {
             syncAtmosphereIfNeeded()
             return
         }
@@ -1410,6 +1424,8 @@ struct MediaExploreContentView: View {
                 await viewModel.loadMoreWorkshop()
             case .dongtai:
                 await viewModel.loadMoreDongTai()
+            case .coverr:
+                await viewModel.loadMoreCoverr()
             default:
                 await viewModel.loadMore()
             }
@@ -1485,6 +1501,8 @@ struct MediaExploreContentView: View {
                 await viewModel.resetAndLoadDefaultWorkshopFeed()
             case .dongtai:
                 await viewModel.resetAndLoadDefaultDongTaiFeed()
+            case .coverr:
+                await viewModel.loadCoverrFeed()
             default:
                 await viewModel.resetAndLoadDefaultHomeFeed()
             }

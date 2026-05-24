@@ -80,6 +80,14 @@ final class MediaExploreViewModel: ObservableObject {
     /// 加载世代计数器，用于丢弃旧请求的结果
     private var dongtaiLoadGeneration: UInt = 0
 
+    // MARK: - Coverr 分页状态
+    /// Coverr 当前页码（从0开始）
+    private var coverrCurrentPage = 0
+    /// Coverr 是否还有更多
+    private var coverrHasMore = true
+    /// Coverr 搜索词
+    private var coverrSearchQuery = ""
+
     /// 与 WallpaperViewModel.libraryContentRevision 相同用途：保证列表上的收藏/下载状态随库更新而刷新。
     @Published private(set) var libraryContentRevision: UInt = 0
 
@@ -136,6 +144,8 @@ final class MediaExploreViewModel: ObservableObject {
                             await self.loadWorkshopFeed()
                         case .dongtai:
                             await self.loadDongTaiFeed()
+                        case .coverr:
+                            await self.loadCoverrFeed()
                         default:
                             await self.loadHomeFeed()
                         }
@@ -166,6 +176,16 @@ final class MediaExploreViewModel: ObservableObject {
                     self.sourceSwitchTask = Task { [weak self] in
                         guard let self else { return }
                         await self.loadDongTaiFeed()
+                        await self.refreshHomeItems()
+                    }
+                case .coverr:
+                    // 切换到 Coverr 视频源
+                    self.coverrCurrentPage = 0
+                    self.coverrHasMore = true
+                    self.coverrSearchQuery = ""
+                    self.sourceSwitchTask = Task { [weak self] in
+                        guard let self else { return }
+                        await self.loadCoverrFeed()
                         await self.refreshHomeItems()
                     }
                 default:
@@ -292,6 +312,8 @@ final class MediaExploreViewModel: ObservableObject {
             await loadWorkshopFeed()
         case .dongtai:
             await loadDongTaiFeed()
+        case .coverr:
+            await loadCoverrFeed()
         default:
             await load(source: .home)
         }
@@ -444,7 +466,8 @@ final class MediaExploreViewModel: ObservableObject {
         prioritizeVisible: Bool
     ) {
         guard workshopSourceManager.activeSource != .wallpaperEngine,
-              workshopSourceManager.activeSource != .dongtai else { return }
+              workshopSourceManager.activeSource != .dongtai,
+              workshopSourceManager.activeSource != .coverr else { return }
 
         let candidates = items.filter(shouldPrefetchDetail(for:))
 
@@ -613,6 +636,9 @@ final class MediaExploreViewModel: ObservableObject {
                 )
                 let result = dynamicWallpaperService.queryItems(params: params)
                 homeItems = result.items
+            case .coverr:
+                let (items, _) = try await CoverrService.shared.fetchVideos(page: 0, pageSize: 10, sort: "popular")
+                homeItems = Array(items.prefix(10))
             default:
                 let page = try await mediaService.fetchPage(source: .home)
                 page.items.forEach { mediaLibrary.upsert($0) }
@@ -1762,6 +1788,80 @@ final class MediaExploreViewModel: ObservableObject {
         dongtaiHasMore = result.hasMore
         hasMorePages = result.hasMore
         print("[MediaExploreViewModel] loadMoreDongTai completed: +\(newItems.count) items, total: \(items.count)")
+    }
+
+    // MARK: - Coverr 数据加载
+
+    /// 加载 Coverr 视频列表
+    func loadCoverrFeed() async {
+        print("[MediaExploreViewModel] loadCoverrFeed called")
+        isLoading = true
+        errorMessage = nil
+        coverrCurrentPage = 0
+        coverrHasMore = true
+
+        defer {
+            isLoading = false
+        }
+
+        do {
+            let result = try await CoverrService.shared.fetchVideos(page: 0, pageSize: 30, sort: "popular")
+            items = result
+            coverrCurrentPage = 0
+            coverrHasMore = !result.isEmpty
+            hasMorePages = coverrHasMore
+            currentTitle = "Coverr"
+            print("[MediaExploreViewModel] loadCoverrFeed loaded \(result.count) items")
+        } catch {
+            print("[MediaExploreViewModel] loadCoverrFeed failed: \(error)")
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    /// 加载更多 Coverr 视频
+    func loadMoreCoverr() async {
+        guard !isLoading, !isLoadingMore, coverrHasMore else { return }
+        isLoadingMore = true
+        defer { isLoadingMore = false }
+
+        let nextPage = coverrCurrentPage + 1
+        do {
+            let result = try await CoverrService.shared.fetchVideos(page: nextPage, pageSize: 30, sort: "popular")
+            coverrCurrentPage = nextPage
+            coverrHasMore = !result.isEmpty
+            hasMorePages = coverrHasMore
+            items.append(contentsOf: result)
+            enforceExploreItemLimit()
+        } catch {
+            print("[MediaExploreViewModel] loadMoreCoverr failed: \(error)")
+        }
+    }
+
+    /// 搜索 Coverr 视频
+    func searchCoverr(query: String) async {
+        print("[MediaExploreViewModel] searchCoverr: \(query)")
+        isLoading = true
+        coverrCurrentPage = 0
+        coverrSearchQuery = query
+        errorMessage = nil
+
+        defer { isLoading = false }
+
+        guard !query.isEmpty else {
+            await loadCoverrFeed()
+            return
+        }
+
+        do {
+            let (result, total) = try await CoverrService.shared.search(query: query, page: 0, pageSize: 30)
+            items = result
+            coverrHasMore = result.count < total
+            hasMorePages = coverrHasMore
+            currentTitle = "Coverr: \(query)"
+        } catch {
+            print("[MediaExploreViewModel] searchCoverr failed: \(error)")
+            errorMessage = error.localizedDescription
+        }
     }
 
     // MARK: - 按作者获取 Workshop 物品

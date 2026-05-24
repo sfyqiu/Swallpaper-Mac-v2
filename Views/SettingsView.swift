@@ -393,6 +393,19 @@ private var languageBinding: Binding<LocalizationService.Language> {
                 }
             }
 
+            // Coverr API Key
+            MacSettingsSection {
+                MacSettingsRow(title: "Coverr API Key", subtitle: "用于 Coverr 免费 CC0 视频源，2000次/小时，从 coverr.co/developers 获取", showDivider: false) {
+                    SecureField("输入 Coverr API Key...", text: $viewModel.coverrApiKey)
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 12, weight: .medium, design: .monospaced))
+                        .frame(width: 240)
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 12, weight: .medium, design: .monospaced))
+                        .frame(width: 240)
+                }
+            }
+
             // 代理设置组
             MacSettingsSection(header: t("proxySettings")) {
                 MacSettingsRow(
