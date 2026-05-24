@@ -107,7 +107,7 @@ final class UpdateChecker: ObservableObject {
 
     // GitHub 仓库配置
     private let owner = "sfyqiu"
-    private let repo = "Swallpaper-Mac"
+    private let repo = "Swallpaper-Mac-v2"
     private let apiURL = "https://api.github.com/repos/sfyqiu/Swallpaper-Mac-v2/releases/latest"
 
     // UserDefaults keys
@@ -384,7 +384,7 @@ final class UpdateManager: ObservableObject {
     
     // MARK: - 配置
     private let owner = "sfyqiu"
-    private let repo = "Swallpaper-Mac"
+    private let repo = "Swallpaper-Mac-v2"
     
     private init() {}
     
