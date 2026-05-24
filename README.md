@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="Design/Logo/AppIcon_Glass.png" width="120" height="120" />
+  <img src="Docs/logo.png" width="120" height="120" />
 </p>
 
 <p align="center">
