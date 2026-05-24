@@ -233,6 +233,61 @@ final class CloudLibrarySyncService: ObservableObject {
         )
     }
 
+    // MARK: - Record Management
+
+    /// 记录一次下载到云盘元数据
+    func recordDownload(id: String, kind: CloudLibraryItemKind, source: String, title: String?,
+                        remoteURL: String?, fileURL: URL, thumbnailPath: String? = nil,
+                        fileSize: Int64? = nil) throws {
+        guard isEnabled, let _ = libraryURL else { return }
+        let relPath = try relativePath(for: fileURL)
+        let record = CloudLibraryRecord(
+            id: id, kind: kind, source: source, title: title,
+            remoteURL: remoteURL, relativeFilePath: relPath,
+            thumbnailPath: thumbnailPath, createdAt: Date(), updatedAt: Date(),
+            fileSize: fileSize, sha256: nil, status: .available
+        )
+        // 追加到 wallpapers.json 或 media.json
+        let metadataFile: String
+        switch kind {
+        case .staticWallpaper: metadataFile = "wallpapers.json"
+        case .videoWallpaper, .liveWallpaper: metadataFile = "media.json"
+        case .thumbnail: return
+        }
+        var records = (try? readRecords(from: metadataURL(metadataFile))) ?? []
+        records.removeAll { $0.id == id }
+        records.append(record)
+        try writeRecords(records, to: metadataFile)
+        // 更新 manifest
+        if var mf = manifest {
+            switch kind {
+            case .staticWallpaper: mf.records.wallpapers += 1
+            case .videoWallpaper: mf.records.media += 1
+            case .liveWallpaper: mf.records.media += 1
+            case .thumbnail: break
+            }
+            mf.records.downloads += 1
+            try saveManifest(mf)
+        }
+    }
+
+    private func metadataURL(_ name: String) -> URL {
+        libraryURL!.appendingPathComponent("metadata/\(name)", isDirectory: false)
+    }
+
+    // MARK: - Migration
+
+    /// 迁移当前本地库到云盘（不删除原文件）
+    func migrateCurrentLibrary() async throws {
+        guard isEnabled, let _ = libraryURL else { throw CloudSyncError.notEnabled }
+        status = .migrating
+        defer { status = .ready }
+        // 步骤在 view model 中调用，这里给基本签名
+        try ensureDirectoryStructure(at: libraryURL!)
+        let mf = CloudLibraryManifest.create(provider: selectedProvider ?? .custom)
+        try saveManifest(mf)
+    }
+
     // MARK: - Path Helpers
 
     func destinationURL(for recordID: String, kind: CloudLibraryItemKind, suggestedFilename: String) throws -> URL {

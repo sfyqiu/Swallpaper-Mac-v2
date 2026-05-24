@@ -638,25 +638,27 @@ private struct CloudSyncSettingsTab: View {
     @State private var showDeleteConfirm = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("云盘同步库")
-                .font(.system(size: 16, weight: .bold, design: .default))
-                .foregroundStyle(.primary)
-                .padding(.top, 8)
+        ScrollView(.vertical, showsIndicators: true) {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("云盘同步库")
+                    .font(.system(size: 16, weight: .bold, design: .default))
+                    .foregroundStyle(.primary)
+                    .padding(.top, 8)
 
-            Text("将下载的壁纸和视频同步到云盘目录，换电脑后可以恢复。\n不需要登录云盘账号，只需选择本机已同步的云盘文件夹。")
-                .font(.system(size: 12, weight: .regular))
-                .foregroundStyle(.secondary)
-                .padding(.bottom, 8)
+                Text("将下载的壁纸和视频同步到云盘目录，换电脑后可以恢复。\n不需要登录云盘账号，只需选择本机已同步的云盘文件夹。")
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundStyle(.secondary)
+                    .padding(.bottom, 8)
 
-            if viewModel.cloudSyncService.isEnabled {
-                enabledStateContent
-            } else {
-                disabledStateContent
+                if viewModel.cloudSyncService.isEnabled {
+                    enabledStateContent
+                } else {
+                    disabledStateContent
+                }
             }
+            .padding(20)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(20)
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     @ViewBuilder
@@ -693,6 +695,18 @@ private struct CloudSyncSettingsTab: View {
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(Color(hex: "54AEFF"))
 
+                Button("迁移当前库到云盘") {
+                    Task { await viewModel.migrateToCloud() }
+                }
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Color(hex: "54AEFF"))
+
+                Button("重新扫描同步库") {
+                    Task { await viewModel.rescanCloudLibrary() }
+                }
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Color(hex: "54AEFF"))
+
                 Button("关闭同步（不删除云端文件）") {
                     viewModel.cloudSyncService.disable()
                 }
@@ -700,6 +714,18 @@ private struct CloudSyncSettingsTab: View {
                 .foregroundStyle(Color(hex: "FF453A"))
             }
             .padding(.horizontal, 16).padding(.vertical, 8)
+        }
+
+        // 扫描结果
+        if let result = viewModel.cloudSyncScanResult {
+            MacSettingsSection(header: "扫描结果") {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("总记录: \(result.totalRecords)").font(.system(size: 12)).foregroundStyle(.secondary)
+                    Text("可用: \(result.availableCount)").font(.system(size: 12)).foregroundStyle(.green)
+                    Text("缺失: \(result.missingCount)").font(.system(size: 12)).foregroundStyle(.orange)
+                }
+                .padding(.horizontal, 16).padding(.vertical, 8)
+            }
         }
     }
 

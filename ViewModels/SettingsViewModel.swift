@@ -91,6 +91,29 @@ class SettingsViewModel: ObservableObject {
 
     // MARK: - 云盘同步库
     @Published var cloudSyncService = CloudLibrarySyncService.shared
+    @Published var cloudSyncScanResult: CloudLibraryScanResult?
+    @Published var isMigratingToCloud = false
+    @Published var isScanningForRestore = false
+
+    func migrateToCloud() async {
+        isMigratingToCloud = true
+        do {
+            try await cloudSyncService.migrateCurrentLibrary()
+        } catch {
+            cloudSyncService.status = .error(error.localizedDescription)
+        }
+        isMigratingToCloud = false
+    }
+
+    func rescanCloudLibrary() async {
+        isScanningForRestore = true
+        do {
+            cloudSyncScanResult = try await cloudSyncService.scanLibrary()
+        } catch {
+            cloudSyncService.status = .error(error.localizedDescription)
+        }
+        isScanningForRestore = false
+    }
 
     // MARK: - 调度器相关（延迟初始化，避免启动时阻塞）
     private var _schedulerViewModel: WallpaperSchedulerViewModel?

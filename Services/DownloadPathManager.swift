@@ -217,6 +217,17 @@ final class DownloadPathManager {
     }
 
     func destinationFolder(for type: ContentType) -> URL {
+        // 云盘同步已启用时，使用云盘目录
+        let cloudSync = CloudLibrarySyncService.shared
+        if cloudSync.isEnabled, let _ = cloudSync.libraryURL {
+            switch type {
+            case .wallpaper:
+                return cloudSync.libraryURL!.appendingPathComponent("files/wallpapers", isDirectory: true)
+            case .media:
+                return cloudSync.libraryURL!.appendingPathComponent("files/videos", isDirectory: true)
+            }
+        }
+        // 默认行为不变
         switch type {
         case .wallpaper:
             return wallpapersFolderURL
@@ -227,7 +238,7 @@ final class DownloadPathManager {
 
     func wallpaperFileURL(id: String, fileExtension: String) -> URL {
         let fileName = "wallhaven-\(id).\(fileExtension)"
-        return wallpapersFolderURL.appendingPathComponent(fileName)
+        return destinationFolder(for: .wallpaper).appendingPathComponent(fileName)
     }
 
     func mediaFileURL(slug: String, label: String, fileExtension: String) -> URL {
@@ -236,7 +247,7 @@ final class DownloadPathManager {
             .trimmingCharacters(in: CharacterSet(charactersIn: "-"))
         let safeLabel = label.lowercased().replacingOccurrences(of: " ", with: "-")
         let fileName = "motionbgs-\(safeSlug)-\(safeLabel).\(fileExtension)"
-        return mediaFolderURL.appendingPathComponent(fileName)
+        return destinationFolder(for: .media).appendingPathComponent(fileName)
     }
 
     // MARK: - 路径检测
