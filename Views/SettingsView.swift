@@ -356,6 +356,16 @@ private var languageBinding: Binding<LocalizationService.Language> {
                 }
             }
 
+            // Unsplash API Key
+            MacSettingsSection {
+                MacSettingsRow(title: "Unsplash Access Key", subtitle: "用于 Unsplash 壁纸源，免费申请 50次/小时", showDivider: false) {
+                    SecureField("输入 Unsplash Access Key...", text: $viewModel.unsplashAccessKey)
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 12, weight: .medium, design: .monospaced))
+                        .frame(width: 240)
+                }
+            }
+
             // 代理设置组
             MacSettingsSection(header: t("proxySettings")) {
                 MacSettingsRow(

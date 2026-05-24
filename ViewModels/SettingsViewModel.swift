@@ -37,6 +37,7 @@ class SettingsViewModel: ObservableObject {
     @Published var hdrEnabled = true { didSet { UserDefaults.standard.set(hdrEnabled, forKey: "hdr_enabled") } }
     @Published var showAllWorkshopContent = true { didSet { UserDefaults.standard.set(showAllWorkshopContent, forKey: "show_all_workshop_content") } }
     @Published var githubToken: String = "" { didSet { UserDefaults.standard.set(githubToken, forKey: "github_token") } }
+    @Published var unsplashAccessKey: String = "" { didSet { UserDefaults.standard.set(unsplashAccessKey, forKey: "unsplash_access_key") } }
     @Published var proxyEnabled = false { didSet { UserDefaults.standard.set(proxyEnabled, forKey: "proxy_enabled"); syncProxySettings() } }
     @Published var proxyHost: String = "" { didSet { UserDefaults.standard.set(proxyHost, forKey: "proxy_host"); syncProxySettings() } }
     @Published var proxyPort: String = "" { didSet { UserDefaults.standard.set(proxyPort, forKey: "proxy_port"); syncProxySettings() } }
@@ -132,6 +133,8 @@ class SettingsViewModel: ObservableObject {
         hdrEnabled = defaults.object(forKey: "hdr_enabled") as? Bool ?? true
         showAllWorkshopContent = defaults.bool(forKey: "show_all_workshop_content")
         githubToken = defaults.string(forKey: "github_token") ?? ""
+        unsplashAccessKey = defaults.string(forKey: "unsplash_access_key") ?? ""
+        unsplashAccessKey = defaults.string(forKey: "unsplash_access_key") ?? ""
         proxyEnabled = defaults.bool(forKey: "proxy_enabled")
         proxyHost = defaults.string(forKey: "proxy_host") ?? ""
         proxyPort = defaults.string(forKey: "proxy_port") ?? ""
