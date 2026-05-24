@@ -637,7 +637,7 @@ final class MediaExploreViewModel: ObservableObject {
                 let result = dynamicWallpaperService.queryItems(params: params)
                 homeItems = result.items
             case .coverr:
-                let (items, _) = try await CoverrService.shared.fetchVideos(page: 0, pageSize: 10, sort: "popular")
+                let items = try await CoverrService.shared.fetchVideos(page: 0, pageSize: 10, sort: "popular")
                 homeItems = Array(items.prefix(10))
             default:
                 let page = try await mediaService.fetchPage(source: .home)
