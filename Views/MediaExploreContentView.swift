@@ -397,6 +397,21 @@ struct MediaExploreContentView: View {
                 }
                 .menuStyle(.borderlessButton)
                 .offset(y: 1.5)
+
+                // 一键切换按钮
+                Button {
+                    let sources = WorkshopSourceManager.SourceType.allCases
+                    if let currentIdx = sources.firstIndex(of: WorkshopSourceManager.shared.activeSource) {
+                        let nextIdx = (currentIdx + 1) % sources.count
+                        WorkshopSourceManager.shared.switchTo(sources[nextIdx])
+                    }
+                } label: {
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(arcSettings.primaryText.opacity(0.65))
+                }
+                .buttonStyle(.plain)
+                .help("切换媒体源")
             }
 
             Text(t("exploreMedia"))
