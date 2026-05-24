@@ -751,6 +751,12 @@ private struct CloudSyncSettingsTab: View {
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(Color(hex: "54AEFF"))
 
+                Button("切换到其他云盘") {
+                    viewModel.cloudSyncService.disable()
+                }
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(.secondary)
+
                 Button("关闭同步（不删除云端文件）") {
                     viewModel.cloudSyncService.disable()
                 }

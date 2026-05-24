@@ -95,8 +95,24 @@ final class CloudLibrarySyncService: ObservableObject {
         manifest = nil
         isEnabled = false
         status = .disabled
-
         UserDefaults.standard.set(false, forKey: enabledKey)
+    }
+
+    /// 原子切换到另一个云盘（保持启用状态，不中断下载路径）
+    func switchTo(provider: CloudProvider, rootURL: URL) throws {
+        let newLibURL = try createOrUseLibrary(at: rootURL, provider: provider)
+        try ensureDirectoryStructure(at: newLibURL)
+        let newManifest = CloudLibraryManifest.create(provider: provider)
+        // 先设置新路径，再保存 manifest
+        libraryURL = newLibURL
+        cachedAccessURL = newLibURL
+        try saveManifest(newManifest)
+        let bookmarkData = try createBookmark(for: newLibURL)
+        UserDefaults.standard.set(bookmarkData, forKey: libraryURLBookmarkKey)
+        UserDefaults.standard.set(provider.rawValue, forKey: providerKey)
+        selectedProvider = provider
+        manifest = newManifest
+        status = .ready
     }
 
     /// 让用户手动选择目录（OpenPanel）
