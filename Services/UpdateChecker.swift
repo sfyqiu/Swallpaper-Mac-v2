@@ -108,7 +108,7 @@ final class UpdateChecker: ObservableObject {
     // GitHub 仓库配置
     private let owner = "sfyqiu"
     private let repo = "Swallpaper-Mac"
-    private let apiURL = "https://api.github.com/repos/sfyqiu/Swallpaper-Mac/releases/latest"
+    private let apiURL = "https://api.github.com/repos/sfyqiu/Swallpaper-Mac-v2/releases/latest"
 
     // UserDefaults keys
     private let lastCheckKey = "update_checker_last_check"
