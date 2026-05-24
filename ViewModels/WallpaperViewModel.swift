@@ -802,6 +802,8 @@ class WallpaperViewModel: ObservableObject {
             return try await fetchFromPexels(parameters: parameters)
         case .nasa:
             return try await fetchFromNASA(parameters: parameters)
+        case .nasaImages:
+            return try await fetchFromNASAImages(parameters: parameters)
         case .unsplash:
             return try await fetchFromUnsplash(parameters: parameters)
         }
@@ -861,6 +863,23 @@ class WallpaperViewModel: ObservableObject {
         )
     }
 
+    private func fetchFromNASAImages(parameters: WallhavenAPI.SearchParameters) async throws -> WallpaperSearchResponse {
+        let query = parameters.query.isEmpty ? "space" : parameters.query
+        let page = parameters.page
+        let (wallpapers, total) = try await NASAImagesService.shared.search(query: query, page: page, pageSize: 30)
+        return WallpaperSearchResponse(
+            meta: WallpaperSearchResponse.Meta(
+                query: query,
+                currentPage: page,
+                perPage: .int(30),
+                total: total,
+                lastPage: max(1, Int(ceil(Double(total) / 30.0))),
+                seed: nil
+            ),
+            data: wallpapers
+        )
+    }
+
     private func fetchFromUnsplash(parameters: WallhavenAPI.SearchParameters) async throws -> WallpaperSearchResponse {
         let query = parameters.query.isEmpty ? "wallpaper" : parameters.query
         let page = parameters.page
@@ -886,6 +905,8 @@ class WallpaperViewModel: ObservableObject {
             return try await fetchFromPexels(parameters: parameters)
         case .nasa:
             return try await fetchFromNASA(parameters: parameters)
+        case .nasaImages:
+            return try await fetchFromNASAImages(parameters: parameters)
         case .fourKWallpapers:
             do {
                 // 4K 分类映射：优先使用用户在探索页选择的 4K 分类，否则尝试从 WallHaven 分类推断
@@ -1212,6 +1233,8 @@ class WallpaperViewModel: ObservableObject {
             return pexelsPhotos
         case .nasa:
             return try await NASAService.shared.fetchRecent(count: 24)
+        case .nasaImages:
+            return try await NASAImagesService.shared.fetchPopular(page: 1)
         case .unsplash:
             let p = WallhavenAPI.SearchParameters(query: "", page: 1)
             return try await fetchFromUnsplash(parameters: p).data
@@ -1245,6 +1268,8 @@ class WallpaperViewModel: ObservableObject {
             return try await PexelsService.shared.fetchCurated(page: 1, perPage: 8)
         case .nasa:
             return try await NASAService.shared.fetchRecent(count: 8)
+        case .nasaImages:
+            return try await NASAImagesService.shared.fetchPopular(page: 1)
         case .unsplash:
             let p = WallhavenAPI.SearchParameters(query: "", page: 1)
             return try await fetchFromUnsplash(parameters: p).data
@@ -1277,6 +1302,8 @@ class WallpaperViewModel: ObservableObject {
             return try await PexelsService.shared.fetchCurated(page: 1, perPage: 8)
         case .nasa:
             return try await NASAService.shared.fetchRecent(count: 8)
+        case .nasaImages:
+            return try await NASAImagesService.shared.fetchPopular(page: 1)
         case .unsplash:
             let p = WallhavenAPI.SearchParameters(query: "", page: 1)
             return try await fetchFromUnsplash(parameters: p).data
