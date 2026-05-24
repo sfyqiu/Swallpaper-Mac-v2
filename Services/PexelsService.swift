@@ -122,7 +122,9 @@ final class PexelsService: ObservableObject {
         request.setValue(apiKey, forHTTPHeaderField: "Authorization")
         request.timeoutInterval = 10
         let data = try await NetworkService.shared.fetchData(request: request)
-        return try JSONDecoder().decode(T.self, from: data)
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return try decoder.decode(T.self, from: data)
     }
 
     private func fetch<T: Codable>(url: URL) async throws -> T {
@@ -130,7 +132,9 @@ final class PexelsService: ObservableObject {
         request.setValue(apiKey, forHTTPHeaderField: "Authorization")
         request.timeoutInterval = 15
         let data = try await NetworkService.shared.fetchData(request: request)
-        return try JSONDecoder().decode(T.self, from: data)
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return try decoder.decode(T.self, from: data)
     }
 
     private func convert(_ photo: PexelsPhoto) -> Wallpaper {

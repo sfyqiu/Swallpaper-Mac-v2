@@ -89,7 +89,9 @@ final class UnsplashService: ObservableObject {
         request.setValue("v1", forHTTPHeaderField: "Accept-Version")
         request.timeoutInterval = 10
         let data = try await NetworkService.shared.fetchData(request: request)
-        return try JSONDecoder().decode(T.self, from: data)
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return try decoder.decode(T.self, from: data)
     }
 
     // MARK: - 通用请求
@@ -100,7 +102,9 @@ final class UnsplashService: ObservableObject {
         request.setValue("v1", forHTTPHeaderField: "Accept-Version")
         request.timeoutInterval = 15
         let data = try await NetworkService.shared.fetchData(request: request)
-        return try JSONDecoder().decode(T.self, from: data)
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return try decoder.decode(T.self, from: data)
     }
 
     // MARK: - 转换为 Wallpaper

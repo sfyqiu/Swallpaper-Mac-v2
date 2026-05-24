@@ -22,7 +22,7 @@ struct CoverrVideo: Codable {
     let poster: String?
     let thumbnail: String?
     let tags: [String]?
-    let duration: Double
+    let duration: String
     let maxWidth: Int?
     let maxHeight: Int?
     let aspectRatio: String?
@@ -151,7 +151,7 @@ final class CoverrService: ObservableObject {
             posterURL: posterURL,
             tags: video.tags ?? [],
             exactResolution: resolution,
-            durationSeconds: video.duration,
+            durationSeconds: Double(video.duration) ?? 0,
             downloadOptions: [],
             sourceName: "Coverr",
             isAnimatedImage: nil

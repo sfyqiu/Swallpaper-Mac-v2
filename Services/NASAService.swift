@@ -28,7 +28,8 @@ final class NASAService: ObservableObject {
     private let baseURL = "https://api.nasa.gov/planetary/apod"
 
     private var apiKey: String {
-        UserDefaults.standard.string(forKey: "nasa_api_key") ?? "DEMO_KEY"
+        let key = UserDefaults.standard.string(forKey: "nasa_api_key") ?? ""
+        return key.isEmpty ? "DEMO_KEY" : key
     }
 
     /// 获取今日天文图片
