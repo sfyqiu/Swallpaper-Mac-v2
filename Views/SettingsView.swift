@@ -1281,7 +1281,7 @@ private struct AboutSettingsTab: View {
                 // 链接组
                 MacSettingsSection(header: t("links")) {
                     MacLinkRow(title: t("visitWebsite"), action: {
-                        if let url = URL(string: "https://github.com/sfyqiu/Swallpaper-Mac") {
+                        if let url = URL(string: "https://github.com/sfyqiu/Swallpaper-Mac-v2") {
                             NSWorkspace.shared.open(url)
                         }
                     })
@@ -1289,15 +1289,7 @@ private struct AboutSettingsTab: View {
                     Divider().background(Color.white.opacity(0.06)).padding(.leading, 16)
 
                     MacLinkRow(title: t("reportProblem"), action: {
-                        if let url = URL(string: "https://github.com/sfyqiu/Swallpaper-Mac") {
-                            NSWorkspace.shared.open(url)
-                        }
-                    })
-
-                    Divider().background(Color.white.opacity(0.06)).padding(.leading, 16)
-
-                    MacLinkRow(title: t("joinQQGroup"), action: {
-                        if let url = URL(string: "https://qm.qq.com/q/SRCj8msygq") {
+                        if let url = URL(string: "https://github.com/sfyqiu/Swallpaper-Mac-v2/issues") {
                             NSWorkspace.shared.open(url)
                         }
                     })
