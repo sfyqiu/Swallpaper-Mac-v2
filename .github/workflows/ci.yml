@@ -89,7 +89,7 @@ jobs:
               run: |
                   mkdir -p build
                   xcodebuild -project Swallpaper.xcodeproj \
-                    -scheme WaifuX \
+                    -scheme Swallpaper \
                     -destination 'platform=macOS' \
                     -configuration Release \
                     -derivedDataPath build \
@@ -105,7 +105,7 @@ jobs:
               run: |
                   mkdir -p build
                   xcodebuild -project Swallpaper.xcodeproj \
-                    -scheme WaifuX \
+                    -scheme Swallpaper \
                     -destination 'platform=macOS' \
                     -configuration Release \
                     -derivedDataPath build \
