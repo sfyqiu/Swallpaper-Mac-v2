@@ -682,6 +682,11 @@ private struct CloudSyncSettingsTab: View {
             .padding(20)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .alert("错误", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
+            Button("确定") { errorMessage = nil }
+        } message: {
+            Text(errorMessage ?? "")
+        }
     }
 
     @ViewBuilder
