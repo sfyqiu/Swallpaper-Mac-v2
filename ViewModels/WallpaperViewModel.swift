@@ -798,6 +798,8 @@ class WallpaperViewModel: ObservableObject {
             return try await fetchFromWallhaven(parameters: parameters)
         case .fourKWallpapers:
             return try await fetchFromFallbackSource(.fourKWallpapers, parameters: parameters)
+        case .unsplash:
+            return try await fetchFromUnsplash(parameters: parameters)
         }
     }
 
@@ -822,8 +824,26 @@ class WallpaperViewModel: ObservableObject {
     }
 
     /// 从指定的回退源获取数据
+
+    private func fetchFromUnsplash(parameters: WallhavenAPI.SearchParameters) async throws -> WallpaperSearchResponse {
+        let query = parameters.query.isEmpty ? "wallpaper" : parameters.query
+        let page = parameters.page
+        let (wallpapers, total) = try await UnsplashService.shared.search(query: query, page: page)
+        return WallpaperSearchResponse(data: wallpapers, meta: WallhavenAPI.Meta(
+            currentPage: page,
+            lastPage: max(1, Int(ceil(Double(total) / 30.0))),
+            perPage: 30,
+            total: total,
+            query: query,
+            seed: nil
+        ))
+    }
+
     private func fetchFromFallbackSource(_ source: WallpaperSourceManager.SourceType, parameters: WallhavenAPI.SearchParameters) async throws -> WallpaperSearchResponse {
         switch source {
+        case .fourKWallpapers:
+        case .unsplash:
+            return try await fetchFromUnsplash(parameters: parameters)
         case .fourKWallpapers:
             do {
                 // 4K 分类映射：优先使用用户在探索页选择的 4K 分类，否则尝试从 WallHaven 分类推断
@@ -1146,6 +1166,9 @@ class WallpaperViewModel: ObservableObject {
         let sourceManager = WallpaperSourceManager.shared
         switch sourceManager.activeSource {
         case .fourKWallpapers:
+        case .unsplash:
+            return try await fetchFromUnsplash(parameters: parameters)
+        case .fourKWallpapers:
             return try await FourKWallpapersService.shared.fetchFeatured(limit: 24)
         case .wallhaven:
             return try await featuredFromMainSource()
@@ -1172,6 +1195,9 @@ class WallpaperViewModel: ObservableObject {
         let sourceManager = WallpaperSourceManager.shared
         switch sourceManager.activeSource {
         case .fourKWallpapers:
+        case .unsplash:
+            return try await fetchFromUnsplash(parameters: parameters)
+        case .fourKWallpapers:
             return try await FourKWallpapersService.shared.fetchTop(limit: 8)
         case .wallhaven:
             return try await topFromMainSource()
@@ -1196,6 +1222,9 @@ class WallpaperViewModel: ObservableObject {
     func fetchLatestWallpapers() async throws -> [Wallpaper] {
         let sourceManager = WallpaperSourceManager.shared
         switch sourceManager.activeSource {
+        case .fourKWallpapers:
+        case .unsplash:
+            return try await fetchFromUnsplash(parameters: parameters)
         case .fourKWallpapers:
             return try await FourKWallpapersService.shared.fetchLatest(limit: 8)
         case .wallhaven:

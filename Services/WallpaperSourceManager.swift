@@ -3,8 +3,8 @@ import Darwin
 
 // MARK: - 壁纸源管理器
 ///
-/// 管理两个壁纸数据源之间的切换逻辑：
-///   1. WallHaven（主源）→ 4KWallpapers（回退源）
+/// 管理多个壁纸数据源之间的切换逻辑：
+///   1. WallHaven（主源）→ 4KWallpapers → Unsplash（回退链）
 ///   2. 健康检测：请求前 ping Wallhaven，失败则自动切换
 ///   3. 手动切换：用户可在设置中手动选择数据源
 ///   4. 状态持久化：记录用户选择和自动切换状态
@@ -18,11 +18,13 @@ class WallpaperSourceManager: ObservableObject {
     enum SourceType: String, CaseIterable {
         case wallhaven = "wallhaven"
         case fourKWallpapers = "4kwallpapers"
+        case unsplash = "unsplash"
 
         var displayName: String {
             switch self {
             case .wallhaven: return "WallHaven"
             case .fourKWallpapers: return "4K Wallpapers"
+            case .unsplash: return "Unsplash"
             }
         }
 
@@ -30,6 +32,7 @@ class WallpaperSourceManager: ObservableObject {
             switch self {
             case .wallhaven: return t("source.official")
             case .fourKWallpapers: return t("source.fallback")
+            case .unsplash: return "Unsplash"
             }
         }
 
@@ -37,7 +40,8 @@ class WallpaperSourceManager: ObservableObject {
         var fallbackSource: SourceType {
             switch self {
             case .wallhaven: return .fourKWallpapers
-            case .fourKWallpapers: return .fourKWallpapers  // 已是最后一级
+            case .fourKWallpapers: return .unsplash
+            case .unsplash: return .unsplash
             }
         }
 
@@ -45,7 +49,8 @@ class WallpaperSourceManager: ObservableObject {
         var supportsNSFW: Bool {
             switch self {
             case .wallhaven: return true
-            case .fourKWallpapers: return false   // 4KWallpapers 不支持 NSFW
+            case .fourKWallpapers: return false
+            case .unsplash: return false
             }
         }
 
@@ -53,7 +58,8 @@ class WallpaperSourceManager: ObservableObject {
         var supportsWallhavenSorting: Bool {
             switch self {
             case .wallhaven: return true
-            case .fourKWallpapers: return false   // 4K 只支持 Recent / Popular
+            case .fourKWallpapers: return false
+            case .unsplash: return false
             }
         }
 
@@ -77,7 +83,8 @@ class WallpaperSourceManager: ObservableObject {
         var supportsWallhavenCategories: Bool {
             switch self {
             case .wallhaven: return true
-            case .fourKWallpapers: return false   // 4K 使用自己的 30 个分类
+            case .fourKWallpapers: return false
+            case .unsplash: return false
             }
         }
 
@@ -86,6 +93,7 @@ class WallpaperSourceManager: ObservableObject {
             switch self {
             case .wallhaven: return "blue"
             case .fourKWallpapers: return "orange"
+            case .unsplash: return "green"
             }
         }
     }
