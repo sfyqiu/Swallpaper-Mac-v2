@@ -380,6 +380,19 @@ private var languageBinding: Binding<LocalizationService.Language> {
                 }
             }
 
+            // NASA API Key
+            MacSettingsSection {
+                MacSettingsRow(title: "NASA API Key", subtitle: "用于 NASA APOD 源，免费申请 1000次/小时，留空使用 DEMO_KEY（30次/小时）", showDivider: false) {
+                    SecureField("输入 NASA API Key...", text: $viewModel.nasaApiKey)
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 12, weight: .medium, design: .monospaced))
+                        .frame(width: 240)
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 12, weight: .medium, design: .monospaced))
+                        .frame(width: 240)
+                }
+            }
+
             // 代理设置组
             MacSettingsSection(header: t("proxySettings")) {
                 MacSettingsRow(
