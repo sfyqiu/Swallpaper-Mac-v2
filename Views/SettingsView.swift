@@ -199,7 +199,11 @@ private struct GeneralSettingsTab: View {
         Binding(get: { viewModel.apiKey }, set: { viewModel.apiKey = $0 })
     }
 
-        private var githubTokenBinding: Binding<String> {
+            private var pexelsApiKeyBinding: Binding<String> {
+        Binding(get: { viewModel.pexelsApiKey }, set: { viewModel.pexelsApiKey = $0 })
+    }
+
+    private var githubTokenBinding: Binding<String> {
         Binding(get: { viewModel.githubToken }, set: { viewModel.githubToken = $0 })
     }
 
@@ -360,6 +364,16 @@ private var languageBinding: Binding<LocalizationService.Language> {
             MacSettingsSection {
                 MacSettingsRow(title: "Unsplash Access Key", subtitle: "用于 Unsplash 壁纸源，免费申请 50次/小时", showDivider: false) {
                     SecureField("输入 Unsplash Access Key...", text: $viewModel.unsplashAccessKey)
+                }
+            }
+
+            // Pexels API Key
+            MacSettingsSection {
+                MacSettingsRow(title: "Pexels API Key", subtitle: "用于 Pexels 图源和视频，免费申请 200次/小时", showDivider: false) {
+                    SecureField("输入 Pexels API Key...", text: $viewModel.pexelsApiKey)
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 12, weight: .medium, design: .monospaced))
+                        .frame(width: 240)
                         .textFieldStyle(.plain)
                         .font(.system(size: 12, weight: .medium, design: .monospaced))
                         .frame(width: 240)
