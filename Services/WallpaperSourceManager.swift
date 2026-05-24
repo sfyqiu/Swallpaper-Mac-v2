@@ -68,6 +68,7 @@ class WallpaperSourceManager: ObservableObject {
             switch self {
             case .wallhaven: return true
             case .fourKWallpapers: return false
+            case .unsplash: return false
             }
         }
 
@@ -76,6 +77,7 @@ class WallpaperSourceManager: ObservableObject {
             switch self {
             case .wallhaven: return true
             case .fourKWallpapers: return false
+            case .unsplash: return true
             }
         }
 
