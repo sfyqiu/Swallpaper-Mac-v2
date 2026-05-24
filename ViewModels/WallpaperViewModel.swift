@@ -829,6 +829,38 @@ class WallpaperViewModel: ObservableObject {
 
     /// 从指定的回退源获取数据
 
+    private func fetchFromPexels(parameters: WallhavenAPI.SearchParameters) async throws -> WallpaperSearchResponse {
+        let query = parameters.query.isEmpty ? "wallpaper" : parameters.query
+        let page = parameters.page
+        let (wallpapers, total) = try await PexelsService.shared.searchPhotos(query: query, page: page)
+        return WallpaperSearchResponse(
+            meta: WallpaperSearchResponse.Meta(
+                query: query,
+                currentPage: page,
+                perPage: .int(30),
+                total: total,
+                lastPage: max(1, Int(ceil(Double(total) / 30.0))),
+                seed: nil
+            ),
+            data: wallpapers
+        )
+    }
+
+    private func fetchFromNASA(parameters: WallhavenAPI.SearchParameters) async throws -> WallpaperSearchResponse {
+        let wallpapers = try await NASAService.shared.fetchRecent(count: 30)
+        return WallpaperSearchResponse(
+            meta: WallpaperSearchResponse.Meta(
+                query: "",
+                currentPage: 1,
+                perPage: .int(30),
+                total: 30,
+                lastPage: 1,
+                seed: nil
+            ),
+            data: wallpapers
+        )
+    }
+
     private func fetchFromUnsplash(parameters: WallhavenAPI.SearchParameters) async throws -> WallpaperSearchResponse {
         let query = parameters.query.isEmpty ? "wallpaper" : parameters.query
         let page = parameters.page
