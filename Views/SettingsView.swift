@@ -1272,7 +1272,7 @@ private struct AboutSettingsTab: View {
 
                 // 项目信息组
                 MacSettingsSection(header: t("projectInfo")) {
-                    infoRow(title: t("developer"), value: "sfyqiu", isLast: false)
+                    infoRow(title: t("developer"), value: "Swallpaper", isLast: false)
                     infoRow(title: t("wallpaperRuleSource"), value: wallpaperRuleSourceText, isLast: false)
                     infoRow(title: t("animeRuleSource"), value: "KazumiRules", isLast: false)
                     infoRow(title: t("techStack"), value: "SwiftUI + AppKit", isLast: true)
@@ -1638,7 +1638,7 @@ struct SettingsUpdateSection: View {
             tagName: "v38.0.25",
             name: "Swallpaper 38.0.25",
             body: "修复了一些问题",
-            htmlUrl: "https://github.com/sfyqiu/Swallpaper-Mac/releases/tag/v38.0.25",
+            htmlUrl: "https://github.com/sfyqiu/Swallpaper-Mac-v2/releases/tag/v1.3.0",
             publishedAt: "2024-01-01T00:00:00Z",
             prerelease: false,
             draft: false,

@@ -16,7 +16,7 @@ import Foundation
 /// Usage:
 ///   swift tmp/verify_pixel_check.swift \
 ///       /tmp/preview-bake-sck.png \
-///       /tmp/waifux-preview-bake.mp4
+///       /tmp/swallpaper-preview-bake.mp4
 
 // MARK: - Helpers
 

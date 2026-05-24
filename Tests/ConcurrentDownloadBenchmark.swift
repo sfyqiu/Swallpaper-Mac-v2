@@ -8,7 +8,7 @@ import Foundation
 
 /// 测试目标：找一个支持 Range 的大文件
 /// 默认使用 GitHub Release asset（通常 30-100MB，CDN 支持 Range）
-let testURLString = CommandLine.arguments.dropFirst().first ?? "https://github.com/sfyqiu/Swallpaper-Mac/releases/download/v1.0.0/Swallpaper.dmg"
+let testURLString = CommandLine.arguments.dropFirst().first ?? "https://github.com/sfyqiu/Swallpaper-Mac-v2/releases/download/v1.0.0/Swallpaper.dmg"
 
 /// 并发 chunk 数量（与 UpdateChecker 配置一致）
 let parallelChunkCount = 6

@@ -1,7 +1,6 @@
 name: CI
 
-# 本仓库（WaifuX main 线）默认集成分支为 main。
-# 若另有 fork/仓库以 feature/wallpaper-engine 为默认分支，应在那个仓库里单独维护 workflow，勿与这里混用。
+# Swallpaper-Mac-v2 CI 工作流
 on:
     push:
         branches: [main]

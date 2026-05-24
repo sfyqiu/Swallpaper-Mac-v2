@@ -1,5 +1,5 @@
 /**
- * WaifuX 漫画源模板
+ * Swallpaper 漫画源模板
  * 基于 Venera 规则格式
  * 
  * 使用方法：

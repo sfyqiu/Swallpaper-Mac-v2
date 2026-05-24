@@ -6,7 +6,7 @@ import { useLanguage } from "./contexts/LanguageContext"
 import { LanguageSwitcher } from "./components/LanguageSwitcher"
 import "./App.css"
 
-/* ── Nothing Design System: WaifuX Landing ──
+/* -- Nothing Design System: Swallpaper Landing --
     Monochrome · Typographic · Industrial
 */
 
@@ -178,7 +178,7 @@ function App() {
                 <div className="nt-nav-inner">
                     <a href="#" className="nt-brand">
                         <Command className="w-4 h-4" strokeWidth={2} />
-                        <span>WaifuX</span>
+                        <span>Swallpaper</span>
                     </a>
 
                     <div className="nt-nav-links">
@@ -190,7 +190,7 @@ function App() {
                     <div className="nt-nav-actions">
                         <LanguageSwitcher />
                         <a 
-                            href="https://github.com/jipika/WaifuX" 
+                            href="https://github.com/sfyqiu/Swallpaper-Mac-v2" 
                             target="_blank" 
                             rel="noopener noreferrer" 
                             className="nt-btn-icon"
@@ -199,7 +199,7 @@ function App() {
                             <GithubIcon className="w-4 h-4" />
                         </a>
                         <a
-                            href="https://github.com/jipika/WaifuX/releases/latest/download/WaifuX.dmg"
+                            href="https://github.com/sfyqiu/Swallpaper-Mac-v2/releases/latest/download/Swallpaper.dmg"
                             className="nt-btn-primary"
                         >
                             <Download className="w-3.5 h-3.5" />
@@ -233,7 +233,7 @@ function App() {
                         {/* CTA Buttons */}
                         <div className="nt-hero-actions">
                             <a
-                                href="https://github.com/jipika/WaifuX/releases/latest/download/WaifuX.dmg"
+                                href="https://github.com/sfyqiu/Swallpaper-Mac-v2/releases/latest/download/Swallpaper.dmg"
                                 className="nt-btn-hero"
                             >
                                 <Download className="w-[18px] h-[18px]" />
@@ -241,7 +241,7 @@ function App() {
                                 <ArrowRight className="w-4 h-4 ml-auto opacity-60 group-hover:translate-x-0.5 transition-transform" />
                             </a>
                             <a
-                                href="https://github.com/jipika/WaifuX"
+                                href="https://github.com/sfyqiu/Swallpaper-Mac-v2"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="nt-btn-ghost"
@@ -263,7 +263,7 @@ function App() {
                                     <span className="nt-dot nt-dot-yellow" />
                                     <span className="nt-dot nt-dot-green" />
                                 </div>
-                                <span className="nt-device-title">WaifuX</span>
+                                <span className="nt-device-title">Swallpaper</span>
                                 <div className="nt-device-controls">
                                     <span className="nt-control-line" />
                                 </div>
@@ -348,7 +348,7 @@ function App() {
                             
                             <div className="nt-cta-actions">
                                 <a
-                                    href="https://github.com/jipika/WaifuX/releases/latest/download/WaifuX.dmg"
+                                    href="https://github.com/sfyqiu/Swallpaper-Mac-v2/releases/latest/download/Swallpaper.dmg"
                                     className="nt-btn-hero large"
                                 >
                                     <Download className="w-5 h-5" />
@@ -356,7 +356,7 @@ function App() {
                                     <ArrowRight className="w-4 h-4" />
                                 </a>
                                 <a
-                                    href="https://github.com/jipika/WaifuX"
+                                    href="https://github.com/sfyqiu/Swallpaper-Mac-v2"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="nt-btn-ghost large"
@@ -380,7 +380,7 @@ function App() {
                         <div className="nt-footer-brand">
                             <div className="nt-footer-logo">
                                 <Command className="w-5 h-5" strokeWidth={2} />
-                                <span>WaifuX</span>
+                                <span>Swallpaper</span>
                             </div>
                             <p className="nt-footer-about">{t.footer.description.split('\n')[0]}</p>
                         </div>
@@ -388,10 +388,10 @@ function App() {
                         <div className="nt-footer-links">
                             <div className="nt-footer-col">
                                 <h4>{t.footer.links}</h4>
-                                <a href="https://github.com/jipika/WaifuX" target="_blank" rel="noopener noreferrer">
+                                <a href="https://github.com/sfyqiu/Swallpaper-Mac-v2" target="_blank" rel="noopener noreferrer">
                                     <GithubIcon className="w-3.5 h-3.5" />{t.footer.github}
                                 </a>
-                                <a href="https://github.com/jipika/WaifuX-Profiles" target="_blank" rel="noopener noreferrer">
+                                <a href="https://github.com/sfyqiu/Swallpaper-Mac-Profiles" target="_blank" rel="noopener noreferrer">
                                     <ExternalLink className="w-3 h-3" />{t.footer.rules}
                                 </a>
                             </div>
@@ -405,7 +405,7 @@ function App() {
                     
                     <div className="nt-footer-bottom">
                         <p>
-                            Made with <Heart className="w-3 h-3 inline mx-0.5 align-middle" fill="currentColor" /> by jipika
+                            Made with <Heart className="w-3 h-3 inline mx-0.5 align-middle" fill="currentColor" /> 
                         </p>
                     </div>
                 </div>
