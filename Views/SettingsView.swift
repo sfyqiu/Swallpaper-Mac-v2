@@ -24,6 +24,7 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
     case download
     case workshop
     case scheduler
+    case cloudSync
     case about
 
     var id: Self { self }
@@ -34,6 +35,7 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
         case .download: return t("download")
         case .workshop: return t("wallpaperEngine")
         case .scheduler: return t("scheduler")
+        case .cloudSync: return "云盘同步"
         case .about: return t("about")
         }
     }
@@ -42,8 +44,9 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
         switch self {
         case .general: return "gearshape"
         case .download: return "arrow.down.circle"
-        case .workshop: return "gearshape.2" // Steam/Workshop 风格
+        case .workshop: return "gearshape.2"
         case .scheduler: return "clock.arrow.circlepath"
+        case .cloudSync: return "icloud.and.arrow.up"
         case .about: return "info.circle"
         }
     }
@@ -146,6 +149,8 @@ struct SettingsView: View {
                         WorkshopSettingsTab(viewModel: viewModel)
                     case .scheduler:
                         SchedulerSettingsTab(viewModel: viewModel)
+                    case .cloudSync:
+                        CloudSyncSettingsTab(viewModel: viewModel)
                     case .about:
                         AboutSettingsTab(viewModel: viewModel)
                     }
@@ -624,104 +629,127 @@ private var languageBinding: Binding<LocalizationService.Language> {
         } message: {
             Text(t("clearCacheConfirm"))
         }
+    }
+}
 
-        // 云盘同步库
-        cloudSyncSectionContent
+// MARK: - 云盘同步库设置标签
+private struct CloudSyncSettingsTab: View {
+    @ObservedObject var viewModel: SettingsViewModel
+    @State private var showDeleteConfirm = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("云盘同步库")
+                .font(.system(size: 16, weight: .bold, design: .default))
+                .foregroundStyle(.primary)
+                .padding(.top, 8)
+
+            Text("将下载的壁纸和视频同步到云盘目录，换电脑后可以恢复。\n不需要登录云盘账号，只需选择本机已同步的云盘文件夹。")
+                .font(.system(size: 12, weight: .regular))
+                .foregroundStyle(.secondary)
+                .padding(.bottom, 8)
+
+            if viewModel.cloudSyncService.isEnabled {
+                enabledStateContent
+            } else {
+                disabledStateContent
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     @ViewBuilder
-    private var cloudSyncSectionContent: some View {
-        MacSettingsSection(header: "云盘同步库") {
-            // 标题行
-            MacSettingsRow(
-                title: "云盘同步库",
-                subtitle: "将下载的壁纸和视频同步到云盘目录，换电脑后可以恢复",
-                showDivider: false
-            ) { EmptyView() }
-        }
-
-        if viewModel.cloudSyncService.isEnabled {
-            cloudSyncEnabledContent
-        } else {
-            cloudSyncDisabledContent
-        }
-    }
-
-    private var cloudSyncEnabledContent: some View {
-        Group {
+    private var enabledStateContent: some View {
+        MacSettingsSection(header: "同步状态") {
             VStack(alignment: .leading, spacing: 6) {
-                if let p = viewModel.cloudSyncService.selectedProvider {
+                if let provider = viewModel.cloudSyncService.selectedProvider {
                     HStack {
-                        Text("云盘:").font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary)
-                        Text(p.displayName).font(.system(size: 11, weight: .semibold))
+                        Text("云盘:").font(.system(size: 12, weight: .medium)).foregroundStyle(.secondary)
+                        Text(provider.displayName).font(.system(size: 12, weight: .semibold))
                     }
                 }
-                HStack {
-                    Text("状态:").font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary)
-                    statusLabel
+                if let libURL = viewModel.cloudSyncService.libraryURL {
+                    HStack {
+                        Text("目录:").font(.system(size: 12, weight: .medium)).foregroundStyle(.secondary)
+                        Text(libURL.path).font(.system(size: 11, weight: .regular, design: .monospaced)).foregroundStyle(.secondary).lineLimit(2)
+                    }
                 }
             }
             .padding(.horizontal, 16).padding(.vertical, 8)
 
-            HStack(spacing: 8) {
-                Button("选择目录") {
+            MacSettingsRow(title: "同步状态", subtitle: statusText, showDivider: false) { EmptyView() }
+        }
+
+        MacSettingsSection(header: "操作") {
+            VStack(alignment: .leading, spacing: 8) {
+                Button("更改目录") {
                     Task { do {
                         let url = try await viewModel.cloudSyncService.chooseCustomFolder()
                         let p = viewModel.cloudSyncService.selectedProvider ?? .custom
                         try viewModel.cloudSyncService.enable(provider: p, rootURL: url)
                     } catch { print("[CloudSync] error: \(error)") } }
                 }
-                .buttonStyle(.plain).font(.system(size: 11, weight: .semibold))
-                .padding(.horizontal, 12).padding(.vertical, 6)
-                .background(Capsule(style: .continuous).fill(Color.white.opacity(0.1)))
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Color(hex: "54AEFF"))
 
-                Button("关闭同步") { viewModel.cloudSyncService.disable() }
-                .buttonStyle(.plain).font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(Color(hex: "FF453A"))
-                .padding(.horizontal, 12).padding(.vertical, 6)
-                .background(Capsule(style: .continuous).fill(Color.white.opacity(0.1)))
-            }
-            .padding(.horizontal, 16).padding(.bottom, 8)
-        }
-    }
-
-    private var cloudSyncDisabledContent: some View {
-        VStack(spacing: 6) {
-            ForEach(CloudProvider.allCases) { provider in
-                let detected = provider.detectRootURL()
-                HStack {
-                    Image(systemName: provider.iconName).font(.system(size: 14)).foregroundStyle(.secondary).frame(width: 20)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(provider.displayName).font(.system(size: 12, weight: .semibold))
-                        Text(detected?.path ?? "未检测").font(.system(size: 10)).foregroundStyle(detected != nil ? Color.green.opacity(0.7) : .secondary).lineLimit(1)
-                    }
-                    Spacer()
-                    if let d = detected {
-                        Button("使用") { do { try viewModel.cloudSyncService.enable(provider: provider, rootURL: d) } catch {} }
-                            .buttonStyle(.plain).font(.system(size: 10, weight: .semibold)).foregroundStyle(Color(hex: "54AEFF"))
-                    } else {
-                        Button("选择") { Task { do { let u = try await viewModel.cloudSyncService.chooseCustomFolder(); try viewModel.cloudSyncService.enable(provider: provider, rootURL: u) } catch {} } }
-                            .buttonStyle(.plain).font(.system(size: 10, weight: .semibold)).foregroundStyle(.secondary)
-                    }
+                Button("关闭同步（不删除云端文件）") {
+                    viewModel.cloudSyncService.disable()
                 }
-                .padding(.horizontal, 12).padding(.vertical, 8)
-                .background(RoundedRectangle(cornerRadius: 8).fill(Color.white.opacity(0.05)))
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Color(hex: "FF453A"))
             }
+            .padding(.horizontal, 16).padding(.vertical, 8)
         }
-        .padding(.horizontal, 16).padding(.vertical, 8)
     }
 
-    private var statusLabel: some View {
-        let (text, color): (String, Color) = {
-            switch viewModel.cloudSyncService.status {
-            case .disabled: return ("未启用", .secondary)
-            case .ready: return ("就绪", .green)
-            case .scanning: return ("扫描中", .yellow)
-            case .migrating: return ("迁移中", .orange)
-            case .error(let m): return (m, Color(hex: "FF453A"))
+    @ViewBuilder
+    private var disabledStateContent: some View {
+        MacSettingsSection(header: "选择云盘") {
+            VStack(spacing: 8) {
+                ForEach(CloudProvider.allCases) { provider in
+                    let detected = provider.detectRootURL()
+                    HStack {
+                        Image(systemName: provider.iconName).font(.system(size: 16)).foregroundStyle(.secondary).frame(width: 24)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(provider.displayName).font(.system(size: 13, weight: .semibold))
+                            Text(provider.subtitle).font(.system(size: 11)).foregroundStyle(.secondary)
+                            Text(detected?.path ?? "未检测到，请手动选择")
+                                .font(.system(size: 10, weight: .regular, design: .monospaced))
+                                .foregroundStyle(detected != nil ? Color.green.opacity(0.7) : Color.orange)
+                                .lineLimit(1).truncationMode(.middle)
+                        }
+                        Spacer()
+                        if let d = detected {
+                            Button("使用") {
+                                do { try viewModel.cloudSyncService.enable(provider: provider, rootURL: d) } catch {}
+                            }
+                            .buttonStyle(.plain).font(.system(size: 11, weight: .semibold)).foregroundStyle(Color(hex: "54AEFF"))
+                        }
+                        Button("选择...") {
+                            Task { do {
+                                let u = try await viewModel.cloudSyncService.chooseCustomFolder()
+                                try viewModel.cloudSyncService.enable(provider: provider, rootURL: u)
+                            } catch {} }
+                        }
+                        .buttonStyle(.plain).font(.system(size: 11, weight: .semibold)).foregroundStyle(.secondary)
+                    }
+                    .padding(.horizontal, 12).padding(.vertical, 10)
+                    .background(RoundedRectangle(cornerRadius: 8).fill(Color.white.opacity(0.05)))
+                }
             }
-        }()
-        return Text(text).font(.system(size: 11, weight: .semibold)).foregroundStyle(color)
+            .padding(.horizontal, 16).padding(.vertical, 8)
+        }
+    }
+
+    private var statusText: String {
+        switch viewModel.cloudSyncService.status {
+        case .disabled: return "未启用"
+        case .ready: return "就绪"
+        case .scanning: return "扫描中..."
+        case .migrating: return "迁移中..."
+        case .error(let m): return m
+        }
     }
 }
 
