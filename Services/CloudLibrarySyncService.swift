@@ -70,6 +70,8 @@ final class CloudLibrarySyncService: ObservableObject {
     func enable(provider: CloudProvider, rootURL: URL) throws {
         let libURL = try createOrUseLibrary(at: rootURL, provider: provider)
         try ensureDirectoryStructure(at: libURL)
+        libraryURL = libURL
+        cachedAccessURL = libURL
 
         let newManifest = CloudLibraryManifest.create(provider: provider)
         try saveManifest(newManifest)
@@ -79,8 +81,6 @@ final class CloudLibrarySyncService: ObservableObject {
         UserDefaults.standard.set(true, forKey: enabledKey)
         UserDefaults.standard.set(provider.rawValue, forKey: providerKey)
 
-        libraryURL = libURL
-        cachedAccessURL = libURL
         selectedProvider = provider
         manifest = newManifest
         isEnabled = true
