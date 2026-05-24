@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - 基础玻璃态修饰器
 struct LiquidGlassModifier: ViewModifier {
     var cornerRadius: CGFloat = 20
-    var material: Material = .ultraThinMaterial
+    var material: Material = .regularMaterial
     var opacity: Double = 0.7
 
     func body(content: Content) -> some View {
@@ -56,7 +56,7 @@ struct SpotlightModifier: ViewModifier {
 extension View {
     func liquidGlass(
         cornerRadius: CGFloat = 20,
-        material: Material = .ultraThinMaterial,
+        material: Material = .regularMaterial,
         opacity: Double = 0.7
     ) -> some View {
         modifier(LiquidGlassModifier(cornerRadius: cornerRadius, material: material, opacity: opacity))

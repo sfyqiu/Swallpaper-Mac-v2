@@ -48,7 +48,7 @@ public struct CategoryChip: View {
                 
                 Text(title)
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.white.opacity(isSelected ? 0.96 : 0.82))
+                    .foregroundStyle(.white.opacity(isSelected ? 0.98 : 0.88))
                     .lineLimit(1)
             }
             .padding(.horizontal, 10)
@@ -56,7 +56,7 @@ public struct CategoryChip: View {
             .background(
                 ZStack {
                     Capsule(style: .continuous)
-                        .fill(.ultraThinMaterial)
+                        .fill(Color.black.opacity(0.45))
                     if let accentColor = accentColors.first {
                         Capsule(style: .continuous)
                             .fill(Color(hex: accentColor).opacity(isSelected ? 0.15 : 0.08))
@@ -107,7 +107,7 @@ public struct TagChip: View {
                 .frame(height: 32)
                 .background(
                     Capsule(style: .continuous)
-                        .fill(.ultraThinMaterial)
+                        .fill(Color.black.opacity(0.45))
                 )
                 .overlay(
                     Capsule(style: .continuous)

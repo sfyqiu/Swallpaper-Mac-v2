@@ -260,7 +260,7 @@ struct LiquidGlassSearchBar: View {
         .frame(height: 44)
         .background(
             RoundedRectangle(cornerRadius: GlassStyle.CornerRadius.large, style: .continuous)
-                .fill(.ultraThinMaterial)
+                .fill(Color.black.opacity(0.45))
         )
         .overlay(
             RoundedRectangle(cornerRadius: GlassStyle.CornerRadius.large, style: .continuous)
@@ -306,7 +306,7 @@ struct LiquidGlassDropdownButton<Content: View>: View {
             .padding(.vertical, GlassStyle.Padding.small)
             .background(
                 RoundedRectangle(cornerRadius: GlassStyle.CornerRadius.capsule, style: .continuous)
-                    .fill(.ultraThinMaterial)
+                    .fill(Color.black.opacity(0.45))
                     .opacity(0.85)
             )
             .overlay(
@@ -346,7 +346,7 @@ struct LiquidGlassDropdownContent<Content: View>: View {
         }
         .background(
             RoundedRectangle(cornerRadius: GlassStyle.CornerRadius.medium, style: .continuous)
-                .fill(.ultraThinMaterial)
+                .fill(Color.black.opacity(0.45))
                 .opacity(0.85)
         )
         .clipShape(RoundedRectangle(cornerRadius: GlassStyle.CornerRadius.medium, style: .continuous))
@@ -562,7 +562,7 @@ struct AppleSegmentedControl<T: Hashable>: View {
         .padding(4)
         .background(
             RoundedRectangle(cornerRadius: GlassStyle.CornerRadius.medium, style: .continuous)
-                .fill(.ultraThinMaterial)
+                .fill(Color.black.opacity(0.45))
         )
         .clipShape(RoundedRectangle(cornerRadius: GlassStyle.CornerRadius.medium, style: .continuous))
         .overlay(
