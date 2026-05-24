@@ -114,7 +114,7 @@ final class UnsplashService: ObservableObject {
                 small: photo.urls.small
             ),
             tags: nil,
-            uploader: photo.user.name.map { Wallpaper.Uploader(username: photo.user.username, group: nil) }
+            uploader: nil
         )
     }
 }

@@ -829,14 +829,17 @@ class WallpaperViewModel: ObservableObject {
         let query = parameters.query.isEmpty ? "wallpaper" : parameters.query
         let page = parameters.page
         let (wallpapers, total) = try await UnsplashService.shared.search(query: query, page: page)
-        return WallpaperSearchResponse(data: wallpapers, meta: WallhavenAPI.Meta(
-            currentPage: page,
-            lastPage: max(1, Int(ceil(Double(total) / 30.0))),
-            perPage: 30,
-            total: total,
-            query: query,
-            seed: nil
-        ))
+        return WallpaperSearchResponse(
+            meta: WallpaperSearchResponse.Meta(
+                query: query,
+                currentPage: page,
+                perPage: .int(30),
+                total: total,
+                lastPage: max(1, Int(ceil(Double(total) / 30.0))),
+                seed: nil
+            ),
+            data: wallpapers
+        )
     }
 
     private func fetchFromFallbackSource(_ source: WallpaperSourceManager.SourceType, parameters: WallhavenAPI.SearchParameters) async throws -> WallpaperSearchResponse {
@@ -1165,7 +1168,8 @@ class WallpaperViewModel: ObservableObject {
         let sourceManager = WallpaperSourceManager.shared
         switch sourceManager.activeSource {
         case .unsplash:
-            return try await fetchFromUnsplash(parameters: parameters)
+            let p = WallhavenAPI.SearchParameters(query: "", page: 1)
+            return try await fetchFromUnsplash(parameters: p).data
         case .fourKWallpapers:
             return try await FourKWallpapersService.shared.fetchFeatured(limit: 24)
         case .wallhaven:
@@ -1193,7 +1197,8 @@ class WallpaperViewModel: ObservableObject {
         let sourceManager = WallpaperSourceManager.shared
         switch sourceManager.activeSource {
         case .unsplash:
-            return try await fetchFromUnsplash(parameters: parameters)
+            let p = WallhavenAPI.SearchParameters(query: "", page: 1)
+            return try await fetchFromUnsplash(parameters: p).data
         case .fourKWallpapers:
             return try await FourKWallpapersService.shared.fetchTop(limit: 8)
         case .wallhaven:
@@ -1220,7 +1225,8 @@ class WallpaperViewModel: ObservableObject {
         let sourceManager = WallpaperSourceManager.shared
         switch sourceManager.activeSource {
         case .unsplash:
-            return try await fetchFromUnsplash(parameters: parameters)
+            let p = WallhavenAPI.SearchParameters(query: "", page: 1)
+            return try await fetchFromUnsplash(parameters: p).data
         case .fourKWallpapers:
             return try await FourKWallpapersService.shared.fetchLatest(limit: 8)
         case .wallhaven:

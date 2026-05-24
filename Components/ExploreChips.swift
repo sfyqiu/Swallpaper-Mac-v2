@@ -56,7 +56,7 @@ public struct CategoryChip: View {
             .background(
                 ZStack {
                     Capsule(style: .continuous)
-                        .fill(Color.black.opacity(0.45))
+                        .fill(Color.black.opacity(0.65))
                     if let accentColor = accentColors.first {
                         Capsule(style: .continuous)
                             .fill(Color(hex: accentColor).opacity(isSelected ? 0.15 : 0.08))
@@ -107,7 +107,7 @@ public struct TagChip: View {
                 .frame(height: 32)
                 .background(
                     Capsule(style: .continuous)
-                        .fill(Color.black.opacity(0.45))
+                        .fill(Color.black.opacity(0.65))
                 )
                 .overlay(
                     Capsule(style: .continuous)
@@ -195,7 +195,7 @@ public struct ExploreSearchBar: View {
         .frame(height: 46)
         .exploreFrostedCapsule(
             tint: tint,
-            material: .ultraThinMaterial,
+            material: .regularMaterial,
             tintLayerOpacity: 0.06
         )
     }
@@ -398,7 +398,7 @@ public extension View {
     /// 胶囊控件：源标签、排序菜单、比例菜单等
     func exploreFrostedCapsule(
         tint: Color,
-        material: Material = .thinMaterial,
+        material: Material = .regularMaterial,
         tintLayerOpacity: Double = 0.04
     ) -> some View {
         background {
@@ -420,7 +420,7 @@ public extension View {
         background {
             ZStack {
                 Circle()
-                    .fill(.thinMaterial)
+                    .fill(.regularMaterial)
                 Circle()
                     .fill(tint.opacity(0.05))
             }
