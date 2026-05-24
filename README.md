@@ -18,7 +18,7 @@
 
 <p align="center">
   <samp>
-    基于 <a href="https://github.com/jipika/WaifuX"><b>WaifuX</b></a> 深度二次开发<br>
+    基于 <a href="https://github.com/sfyqiu/WaifuX"><b>WaifuX</b></a> 深度二次开发<br>
     感谢原作者的开源贡献
   </samp>
 </p>
@@ -271,7 +271,7 @@ Swallpaper **并非 Wallpaper Engine 官方产品**，与 Valve Corporation、Kr
 
 <p align="center">
   <samp>
-    Made with 💜 by <a href="https://github.com/jipika">@sfyqiu</a>
+    Made with 💜 by <a href="https://github.com/sfyqiu">@sfyqiu</a>
   </samp>
 </p>
 

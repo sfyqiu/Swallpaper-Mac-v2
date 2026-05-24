@@ -18,7 +18,7 @@
 
 <p align="center">
   <samp>
-    Deeply redeveloped from <a href="https://github.com/jipika/WaifuX"><b>WaifuX</b></a><br>
+    Deeply redeveloped from <a href="https://github.com/sfyqiu/WaifuX"><b>WaifuX</b></a><br>
     Thanks to the original author for the open-source contribution
   </samp>
 </p>
@@ -271,7 +271,7 @@ This application is provided **"AS IS"**, and the developer assumes no liability
 
 <p align="center">
   <samp>
-    Made with 💜 by <a href="https://github.com/jipika">@sfyqiu</a>
+    Made with 💜 by <a href="https://github.com/sfyqiu">@sfyqiu</a>
   </samp>
 </p>
 
