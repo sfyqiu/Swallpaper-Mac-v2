@@ -882,6 +882,10 @@ class WallpaperViewModel: ObservableObject {
         switch source {
         case .unsplash:
             return try await fetchFromUnsplash(parameters: parameters)
+        case .pexels:
+            return try await fetchFromPexels(parameters: parameters)
+        case .nasa:
+            return try await fetchFromNASA(parameters: parameters)
         case .fourKWallpapers:
             do {
                 // 4K 分类映射：优先使用用户在探索页选择的 4K 分类，否则尝试从 WallHaven 分类推断

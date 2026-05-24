@@ -140,8 +140,9 @@ final class PexelsService: ObservableObject {
             .sorted { ($0.width * $0.height) > ($1.width * $1.height) }
             .first
         let videoURL = bestFile.flatMap { URL(string: $0.link) } ?? URL(string: video.url)!
-        let posterURL = video.videoPictures.first.flatMap { URL(string: $0.picture) }
+        let posterURL: URL = video.videoPictures.first.flatMap { URL(string: $0.picture) }
             ?? video.image.flatMap { URL(string: $0) }
+            ?? URL(string: "https://images.pexels.com/lib/pexels-logo.png")!
         let resolution = bestFile.map { "\($0.width)x\($0.height)" } ?? "1920x1080"
 
         return MediaItem(
