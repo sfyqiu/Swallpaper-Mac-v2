@@ -330,6 +330,8 @@ struct MediaExploreContentView: View {
             case .dongtai:
                 dongtaiFilterSection
                 dongtaiActiveFiltersSection
+            case .pexels:
+                EmptyView()
             case .coverr:
                 EmptyView()
             default:
@@ -1079,6 +1081,12 @@ struct MediaExploreContentView: View {
             } else {
                 await viewModel.loadDongTaiFeed()
             }
+        case .pexels:
+            if !query.isEmpty {
+                await viewModel.searchPexelsVideos(query: query)
+            } else {
+                await viewModel.loadPexelsVideos()
+            }
         case .coverr:
             if !query.isEmpty {
                 await viewModel.searchCoverr(query: query)
@@ -1186,6 +1194,8 @@ struct MediaExploreContentView: View {
             await viewModel.loadWorkshopFeed()
         case .dongtai:
             await viewModel.loadDongTaiFeed()
+        case .pexels:
+            await viewModel.loadPexelsVideos()
         case .coverr:
             await viewModel.loadCoverrFeed()
         default:
@@ -1221,6 +1231,8 @@ struct MediaExploreContentView: View {
                 await viewModel.loadWorkshopFeed()
             case .dongtai:
                 await viewModel.loadDongTaiFeed()
+            case .pexels:
+                await viewModel.loadPexelsVideos()
             case .coverr:
                 await viewModel.loadCoverrFeed()
             default:
@@ -1283,6 +1295,8 @@ struct MediaExploreContentView: View {
                 await applyWorkshopFilters(query: query)
             case .dongtai:
                 await viewModel.searchDongTai(query: query)
+            case .pexels:
+                await viewModel.searchPexelsVideos(query: query)
             case .coverr:
                 await viewModel.searchCoverr(query: query)
             default:
@@ -1304,8 +1318,8 @@ struct MediaExploreContentView: View {
     private func handleFilterChange() {
         guard !isApplyingProgrammaticReset else { return }
 
-        // Workshop/DongTai/Coverr 模式下不支持标签过滤
-        if workshopSourceManager.activeSource == .wallpaperEngine || workshopSourceManager.activeSource == .dongtai || workshopSourceManager.activeSource == .coverr {
+        // Workshop/DongTai/Coverr/Pexels 模式下不支持标签过滤
+        if workshopSourceManager.activeSource == .wallpaperEngine || workshopSourceManager.activeSource == .dongtai || workshopSourceManager.activeSource == .coverr || workshopSourceManager.activeSource == .pexels {
             syncAtmosphereIfNeeded()
             return
         }
@@ -1424,6 +1438,8 @@ struct MediaExploreContentView: View {
                 await viewModel.loadMoreWorkshop()
             case .dongtai:
                 await viewModel.loadMoreDongTai()
+            case .pexels:
+                await viewModel.loadMorePexelsVideos()
             case .coverr:
                 await viewModel.loadMoreCoverr()
             default:
@@ -1501,6 +1517,8 @@ struct MediaExploreContentView: View {
                 await viewModel.resetAndLoadDefaultWorkshopFeed()
             case .dongtai:
                 await viewModel.resetAndLoadDefaultDongTaiFeed()
+            case .pexels:
+                await viewModel.loadPexelsVideos()
             case .coverr:
                 await viewModel.loadCoverrFeed()
             default:

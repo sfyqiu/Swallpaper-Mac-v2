@@ -81,12 +81,14 @@ final class MediaExploreViewModel: ObservableObject {
     private var dongtaiLoadGeneration: UInt = 0
 
     // MARK: - Coverr 分页状态
-    /// Coverr 当前页码（从0开始）
     private var coverrCurrentPage = 0
-    /// Coverr 是否还有更多
     private var coverrHasMore = true
-    /// Coverr 搜索词
     private var coverrSearchQuery = ""
+
+    // MARK: - Pexels 视频分页状态
+    private var pexelsVideoCurrentPage = 1
+    private var pexelsVideoHasMore = true
+    private var pexelsVideoSearchQuery = ""
 
     /// 与 WallpaperViewModel.libraryContentRevision 相同用途：保证列表上的收藏/下载状态随库更新而刷新。
     @Published private(set) var libraryContentRevision: UInt = 0
@@ -144,6 +146,8 @@ final class MediaExploreViewModel: ObservableObject {
                             await self.loadWorkshopFeed()
                         case .dongtai:
                             await self.loadDongTaiFeed()
+                        case .pexels:
+                            await self.loadPexelsVideos()
                         case .coverr:
                             await self.loadCoverrFeed()
                         default:
@@ -176,6 +180,16 @@ final class MediaExploreViewModel: ObservableObject {
                     self.sourceSwitchTask = Task { [weak self] in
                         guard let self else { return }
                         await self.loadDongTaiFeed()
+                        await self.refreshHomeItems()
+                    }
+                case .pexels:
+                    // 切换到 Pexels 视频源
+                    self.pexelsVideoCurrentPage = 1
+                    self.pexelsVideoHasMore = true
+                    self.pexelsVideoSearchQuery = ""
+                    self.sourceSwitchTask = Task { [weak self] in
+                        guard let self else { return }
+                        await self.loadPexelsVideos()
                         await self.refreshHomeItems()
                     }
                 case .coverr:
@@ -312,6 +326,8 @@ final class MediaExploreViewModel: ObservableObject {
             await loadWorkshopFeed()
         case .dongtai:
             await loadDongTaiFeed()
+        case .pexels:
+            await loadPexelsVideos()
         case .coverr:
             await loadCoverrFeed()
         default:
@@ -467,7 +483,8 @@ final class MediaExploreViewModel: ObservableObject {
     ) {
         guard workshopSourceManager.activeSource != .wallpaperEngine,
               workshopSourceManager.activeSource != .dongtai,
-              workshopSourceManager.activeSource != .coverr else { return }
+              workshopSourceManager.activeSource != .coverr,
+              workshopSourceManager.activeSource != .pexels else { return }
 
         let candidates = items.filter(shouldPrefetchDetail(for:))
 
@@ -636,6 +653,9 @@ final class MediaExploreViewModel: ObservableObject {
                 )
                 let result = dynamicWallpaperService.queryItems(params: params)
                 homeItems = result.items
+            case .pexels:
+                let pItems = try await PexelsService.shared.fetchPopularVideos(page: 1, perPage: 10)
+                homeItems = Array(pItems.prefix(10))
             case .coverr:
                 let items = try await CoverrService.shared.fetchVideos(page: 0, pageSize: 10, sort: "popular")
                 homeItems = Array(items.prefix(10))
@@ -1860,6 +1880,74 @@ final class MediaExploreViewModel: ObservableObject {
             currentTitle = "Coverr: \(query)"
         } catch {
             print("[MediaExploreViewModel] searchCoverr failed: \(error)")
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    // MARK: - Pexels 视频数据加载
+
+    func loadPexelsVideos() async {
+        print("[MediaExploreViewModel] loadPexelsVideos called")
+        isLoading = true
+        errorMessage = nil
+        pexelsVideoCurrentPage = 1
+        pexelsVideoHasMore = true
+
+        defer { isLoading = false }
+
+        do {
+            let result = try await PexelsService.shared.fetchPopularVideos(page: 1, perPage: 20)
+            items = result
+            pexelsVideoCurrentPage = 1
+            pexelsVideoHasMore = result.count >= 20
+            hasMorePages = pexelsVideoHasMore
+            currentTitle = "Pexels 视频"
+        } catch {
+            print("[MediaExploreViewModel] loadPexelsVideos failed: \(error)")
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func loadMorePexelsVideos() async {
+        guard !isLoading, !isLoadingMore, pexelsVideoHasMore else { return }
+        isLoadingMore = true
+        defer { isLoadingMore = false }
+
+        let nextPage = pexelsVideoCurrentPage + 1
+        do {
+            let result = try await PexelsService.shared.fetchPopularVideos(page: nextPage, perPage: 20)
+            pexelsVideoCurrentPage = nextPage
+            pexelsVideoHasMore = result.count >= 20
+            hasMorePages = pexelsVideoHasMore
+            items.append(contentsOf: result)
+            enforceExploreItemLimit()
+        } catch {
+            print("[MediaExploreViewModel] loadMorePexelsVideos failed: \(error)")
+        }
+    }
+
+    func searchPexelsVideos(query: String) async {
+        print("[MediaExploreViewModel] searchPexelsVideos: \(query)")
+        isLoading = true
+        pexelsVideoCurrentPage = 1
+        pexelsVideoSearchQuery = query
+        errorMessage = nil
+
+        defer { isLoading = false }
+
+        guard !query.isEmpty else {
+            await loadPexelsVideos()
+            return
+        }
+
+        do {
+            let (result, _) = try await PexelsService.shared.searchVideos(query: query, page: 1, perPage: 20)
+            items = result
+            pexelsVideoHasMore = result.count >= 20
+            hasMorePages = pexelsVideoHasMore
+            currentTitle = "Pexels: \(query)"
+        } catch {
+            print("[MediaExploreViewModel] searchPexelsVideos failed: \(error)")
             errorMessage = error.localizedDescription
         }
     }

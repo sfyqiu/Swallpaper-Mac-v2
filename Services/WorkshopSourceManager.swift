@@ -17,6 +17,7 @@ class WorkshopSourceManager: ObservableObject {
         case wallpaperEngine = "wallpaper_engine"
         case dongtai = "dongtai"
         case coverr = "coverr"
+        case pexels = "pexels"
 
         var displayName: String {
             switch self {
@@ -24,6 +25,7 @@ class WorkshopSourceManager: ObservableObject {
             case .wallpaperEngine: return t("wallpaperEngine")
             case .dongtai: return t("dongtai")
             case .coverr: return "Coverr"
+            case .pexels: return "Pexels"
             }
         }
 
@@ -33,6 +35,7 @@ class WorkshopSourceManager: ObservableObject {
             case .wallpaperEngine: return "Steam Workshop"
             case .dongtai: return "动态桌面视频壁纸"
             case .coverr: return "免费 CC0 视频"
+            case .pexels: return "免费图库视频"
             }
         }
 
@@ -43,6 +46,7 @@ class WorkshopSourceManager: ObservableObject {
             case .wallpaperEngine: return "gearshape.fill"
             case .dongtai: return "sparkles.tv.fill"
             case .coverr: return "video.fill"
+            case .pexels: return "camera.fill"
             }
         }
 
@@ -53,6 +57,7 @@ class WorkshopSourceManager: ObservableObject {
             case .wallpaperEngine: return true
             case .dongtai: return true
             case .coverr: return true
+            case .pexels: return true
             }
         }
 
@@ -63,6 +68,7 @@ class WorkshopSourceManager: ObservableObject {
             case .wallpaperEngine: return true
             case .dongtai: return true
             case .coverr: return false
+            case .pexels: return false
             }
         }
 
@@ -73,6 +79,7 @@ class WorkshopSourceManager: ObservableObject {
             case .wallpaperEngine: return false
             case .dongtai: return false
             case .coverr: return false
+            case .pexels: return false
             }
         }
 
@@ -83,6 +90,7 @@ class WorkshopSourceManager: ObservableObject {
             case .wallpaperEngine: return true
             case .dongtai: return false
             case .coverr: return false
+            case .pexels: return false
             }
         }
 
@@ -93,6 +101,7 @@ class WorkshopSourceManager: ObservableObject {
             case .wallpaperEngine: return "blue"
             case .dongtai: return "pink"
             case .coverr: return "orange"
+            case .pexels: return "teal"
             }
         }
     }
