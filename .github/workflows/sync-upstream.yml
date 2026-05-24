@@ -1,0 +1,73 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    - cron: "23 7 * * *"   # 每天 15:23 CST
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Fetch and sync upstream
+        run: |
+          git remote add upstream https://github.com/jipika/WaifuX.git || true
+          git fetch upstream main
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          UPSTREAM_SHA=$(git rev-parse upstream/main)
+          BASE_SHA=$(git merge-base HEAD upstream/main)
+
+          if [ "$UPSTREAM_SHA" = "$BASE_SHA" ]; then
+            echo "Already up to date with upstream."
+            exit 0
+          fi
+
+          BRANCH="sync/upstream-$(date +%Y%m%d-%H%M)"
+          git checkout -b "$BRANCH"
+
+          if git merge upstream/main --no-edit; then
+            echo "Merge succeeded with no conflicts"
+            git push origin "$BRANCH"
+          else
+            echo "Merge has conflicts, pushing branch with conflicts unresolved"
+            git add -A || true
+            git push origin "$BRANCH"
+          fi
+
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+
+      - name: Create Pull Request
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { execSync } = require('child_process');
+            const branch = execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
+
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${branch}`,
+              state: 'open'
+            });
+
+            if (prs.length > 0) {
+              console.log(`PR already exists: ${prs[0].html_url}`);
+              return;
+            }
+
+            const upstreamSha = execSync('git rev-parse upstream/main').toString().trim().substring(0, 7);
+
+            await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Sync upstream (jipika/WaifuX) — ${upstreamSha}`,
+              head: branch,
+              base: 'main',
+              body: `自动同步上游 [jipika/WaifuX](https://github.com/jipika/WaifuX) 的最新提交。\n\n如有冲突请手动解决后再合并。`
+            });

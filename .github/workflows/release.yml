@@ -1,0 +1,209 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-26
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Select Xcode 26.4
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.4.app/Contents/Developer
+          echo "Xcode Path: $(xcode-select -p)"
+          xcodebuild -version
+          swift --version
+
+      - name: Check XcodeGen
+        run: which xcodegen || brew install xcodegen
+
+      - name: Install create-dmg
+        run: brew install create-dmg || true
+
+      - name: Update Version in project.yml
+        run: |
+          VERSION=$(cat VERSION | tr -d '[:space:]')
+          # 提取主版本号（用于 CURRENT_PROJECT_VERSION）
+          MAJOR_VERSION=$(echo $VERSION | cut -d. -f1)
+          echo "Updating project.yml with version: $VERSION (build: $MAJOR_VERSION)"
+          # 使用 sed 替换版本号（macOS 需要 -i '' 指定空备份扩展名）
+          sed -i '' "s/MARKETING_VERSION: .*/MARKETING_VERSION: $VERSION/" project.yml
+          sed -i '' "s/CURRENT_PROJECT_VERSION: .*/CURRENT_PROJECT_VERSION: $MAJOR_VERSION/" project.yml
+          cat project.yml | grep -E "(MARKETING_VERSION|CURRENT_PROJECT_VERSION)"
+
+      - name: Generate Xcode Project
+        run: xcodegen generate
+
+      - name: Cache SPM Dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/Library/Caches/org.swift.swiftpm
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/project.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Read Version
+        id: version
+        run: |
+          VERSION=$(cat VERSION | tr -d '[:space:]')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      - name: Build & Package
+        env:
+          WAIFUX_SKIP_DMG: "1"
+        run: |
+          chmod +x ./scripts/package.sh
+          ./scripts/package.sh
+
+      - name: Sign & Notarize
+        env:
+          APPLE_SIGNING_CERTIFICATE: ${{ secrets.APPLE_SIGNING_CERTIFICATE }}
+          APPLE_SIGNING_CERTIFICATE_PWD: ${{ secrets.APPLE_SIGNING_CERTIFICATE_PWD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+        run: |
+          KEYCHAIN_PATH="$RUNNER_TEMP/sign.keychain-db"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -t 3600 -u "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | tr -d '"')
+          security default-keychain -s "$KEYCHAIN_PATH"
+
+          echo "$APPLE_SIGNING_CERTIFICATE" | base64 -d > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" -P "$APPLE_SIGNING_CERTIFICATE_PWD" -k "$KEYCHAIN_PATH" -f pkcs12 -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/productsign
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" 2>/dev/null || true
+
+          echo "Signing embedded binaries..."
+          sign_embedded_code() {
+            local f="$1"
+            SIGN_ARGS=(--force --sign "${{ vars.APPLE_SIGNING_IDENTITY }}" --options=runtime --timestamp)
+            if [[ "$(basename "$f")" == "wallpaper-wgpu" && -f "WallpaperRenderer.entitlements" ]]; then
+              SIGN_ARGS+=(--entitlements "WallpaperRenderer.entitlements")
+            fi
+            codesign "${SIGN_ARGS[@]}" "$f"
+          }
+
+          find build/WaifuX.app/Contents/Resources -type f | while read -r f; do
+            if file "$f" | grep -qE "Mach-O|ELF"; then
+              sign_embedded_code "$f"
+            fi
+          done
+          if [[ -d build/WaifuX.app/Contents/Frameworks ]]; then
+            find build/WaifuX.app/Contents/Frameworks -maxdepth 1 -type d -name "*.framework" | while read -r f; do
+              sign_embedded_code "$f"
+            done
+          fi
+
+          codesign --force --options=runtime --timestamp \
+            --entitlements WaifuX.entitlements \
+            --sign "${{ vars.APPLE_SIGNING_IDENTITY }}" build/WaifuX.app
+          codesign --verify --deep --strict --verbose=2 build/WaifuX.app
+
+          set +e
+          create-dmg \
+            --volname "WaifuX" \
+            --window-size 540 400 \
+            --app-drop-link 400 185 \
+            --hide-extension "WaifuX.app" \
+            --no-internet-enable \
+            build/WaifuX.dmg \
+            build/WaifuX.app
+          CREATE_DMG_STATUS=$?
+          set -e
+          if [ $CREATE_DMG_STATUS -ne 0 ]; then
+            echo "⚠️ create-dmg failed, falling back to hdiutil..."
+            rm -f build/WaifuX.dmg build/rw.*.WaifuX.dmg
+            hdiutil create -volname "WaifuX" \
+              -srcfolder build/WaifuX.app \
+              -ov -format UDZO \
+              -imagekey zlib-level=9 \
+              build/WaifuX.dmg
+          fi
+
+          NOTARY_OUTPUT=$(xcrun notarytool submit build/WaifuX.dmg \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID" \
+            --wait 2>&1)
+          echo "$NOTARY_OUTPUT"
+
+          SUBMISSION_ID=$(echo "$NOTARY_OUTPUT" | grep -m1 "id:" | awk '{print $2}' | tr -d '[:space:]')
+          STATUS=$(echo "$NOTARY_OUTPUT" | awk '/^  status:/{print $2; exit}' | tr -d '[:space:]')
+          if [ "$STATUS" != "Accepted" ]; then
+            echo "=== Notarization Log ==="
+            xcrun notarytool log "$SUBMISSION_ID" \
+              --apple-id "$APPLE_ID" \
+              --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+              --team-id "$APPLE_TEAM_ID" 2>&1 || true
+            echo "========================"
+            exit 1
+          fi
+
+          for i in {1..5}; do
+            if xcrun stapler staple build/WaifuX.dmg; then
+              echo "✅ 签名+公证完成"
+              break
+            fi
+            if [ $i -eq 5 ]; then
+              exit 1
+            fi
+            sleep 30
+          done
+
+      - name: Generate Changelog
+        id: changelog
+        run: |
+          # 获取上一个 tag（用于生成变更日志）
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          if [ -n "$PREV_TAG" ]; then
+            # 从上一个 tag 到当前提交的 commit messages 生成日志
+            CHANGELOG=$(git log "$PREV_TAG"..HEAD --pretty=format:"- %s (%h)" --no-merges | head -30)
+            echo "Generated changelog from $PREV_TAG to $GITHUB_REF_NAME:"
+            echo "$CHANGELOG"
+          else
+            CHANGELOG="- Initial release"
+            echo "No previous tag found, using default changelog"
+          fi
+
+          # 写入 GITHUB_OUTPUT 供后续 step 使用
+          {
+            echo "changelog<<EOF"
+            echo "$CHANGELOG"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/WaifuX.dmg
+          name: WaifuX ${{ steps.version.outputs.version }}
+          body: |
+            ## 更新内容
+
+            ${{ steps.changelog.outputs.changelog }}
+
+            ## 版本信息
+
+            - 版本号: ${{ steps.version.outputs.version }}
+            - Commit: ${{ github.sha }}
+          draft: true
+          prerelease: ${{ contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
