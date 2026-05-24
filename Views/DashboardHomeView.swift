@@ -150,14 +150,18 @@ struct DashboardHomeView: View {
     private var quickActions: some View {
         HStack(spacing: 12) {
             dashboardButton(icon: "dice", title: "随机一张") {
-                Task { await viewModel.loadRandomWallpaper() }
+                if let wp = viewModel.items.randomElement() {
+                    selectedWallpaper = wp
+                }
             }
-            dashboardButton(icon: "arrow.right.circle", title: "换壁纸") {
-                selectedWallpaper = viewModel.items.randomElement()
+            dashboardButton(icon: "arrow.clockwise", title: "刷新") {
+                Task { await viewModel.refresh() }
             }
             dashboardButton(icon: "clock", title: "调度器") {
-                // 打开设置页调度器
-                NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                // 打开设置
+                if let appDelegate = NSApp.delegate as? AppDelegate {
+                    appDelegate.openSettings()
+                }
             }
         }
     }
@@ -235,14 +239,14 @@ struct DashboardHomeView: View {
 
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4), spacing: 8) {
                     ForEach(Array(downloaded), id: \.id) { record in
-                        if let url = record.thumbnailURL ?? record.localFileURL {
+                        AsyncImage(url: URL(string: record.wallpaper.thumbs.small)) { image in
                             image.resizable().aspectRatio(contentMode: .fill)
                         } placeholder: {
                             Rectangle().fill(Color.white.opacity(0.05))
                         }
                         .frame(height: 80)
                         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                        .onTapGesture { selectedWallpaper = wallpaper }
+                        .onTapGesture { selectedWallpaper = record.wallpaper }
                     }
                 }
             }
