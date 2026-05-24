@@ -287,13 +287,76 @@ final class CloudLibrarySyncService: ObservableObject {
 
     /// 迁移当前本地库到云盘（不删除原文件）
     func migrateCurrentLibrary() async throws {
-        guard isEnabled, let _ = libraryURL else { throw CloudSyncError.notEnabled }
+        guard isEnabled, let libURL = libraryURL else { throw CloudSyncError.notEnabled }
         status = .migrating
         defer { status = .ready }
-        // 步骤在 view model 中调用，这里给基本签名
-        try ensureDirectoryStructure(at: libraryURL!)
+        try ensureDirectoryStructure(at: libURL)
         let mf = CloudLibraryManifest.create(provider: selectedProvider ?? .custom)
         try saveManifest(mf)
+
+        let dpManager = DownloadPathManager.shared
+        var wallpaperRecords: [CloudLibraryRecord] = []
+        var mediaRecords: [CloudLibraryRecord] = []
+
+        // 扫描现有下载目录中的文件
+        let wallpaperDir = dpManager.destinationFolder(for: .wallpaper)
+        if FileManager.default.fileExists(atPath: wallpaperDir.path) {
+            let files = (try? FileManager.default.contentsOfDirectory(at: wallpaperDir, includingPropertiesForKeys: [.fileSizeKey])) ?? []
+            for file in files where !file.lastPathComponent.hasPrefix(".") {
+                let destDir = libURL.appendingPathComponent("files/wallpapers", isDirectory: true)
+                try? FileManager.default.createDirectory(at: destDir, withIntermediateDirectories: true)
+                let dest = destDir.appendingPathComponent(file.lastPathComponent)
+                if !FileManager.default.fileExists(atPath: dest.path) {
+                    try? FileManager.default.copyItem(at: file, to: dest)
+                }
+                let relPath = try? relativePath(for: dest)
+                let fileSize = (try? file.resourceValues(forKeys: [.fileSizeKey]))?.fileSize.flatMap(Int64.init)
+                let id = file.deletingPathExtension().lastPathComponent
+                let record = CloudLibraryRecord(
+                    id: id, kind: .staticWallpaper, source: "wallhaven", title: nil,
+                    remoteURL: nil, relativeFilePath: relPath ?? "", thumbnailPath: nil,
+                    createdAt: Date(), updatedAt: Date(), fileSize: fileSize,
+                    sha256: nil, status: .available
+                )
+                wallpaperRecords.append(record)
+            }
+        }
+
+        let mediaDir = dpManager.destinationFolder(for: .media)
+        if FileManager.default.fileExists(atPath: mediaDir.path) {
+            let files = (try? FileManager.default.contentsOfDirectory(at: mediaDir, includingPropertiesForKeys: [.fileSizeKey])) ?? []
+            for file in files where !file.lastPathComponent.hasPrefix(".") {
+                let destDir = libURL.appendingPathComponent("files/videos", isDirectory: true)
+                try? FileManager.default.createDirectory(at: destDir, withIntermediateDirectories: true)
+                let dest = destDir.appendingPathComponent(file.lastPathComponent)
+                if !FileManager.default.fileExists(atPath: dest.path) {
+                    try? FileManager.default.copyItem(at: file, to: dest)
+                }
+                let relPath = try? relativePath(for: dest)
+                let fileSize = (try? file.resourceValues(forKeys: [.fileSizeKey]))?.fileSize.flatMap(Int64.init)
+                let id = file.deletingPathExtension().lastPathComponent
+                let record = CloudLibraryRecord(
+                    id: id, kind: .videoWallpaper, source: "local", title: nil,
+                    remoteURL: nil, relativeFilePath: relPath ?? "", thumbnailPath: nil,
+                    createdAt: Date(), updatedAt: Date(), fileSize: fileSize,
+                    sha256: nil, status: .available
+                )
+                mediaRecords.append(record)
+            }
+        }
+
+        if !wallpaperRecords.isEmpty {
+            try writeRecords(wallpaperRecords, to: "wallpapers.json")
+        }
+        if !mediaRecords.isEmpty {
+            try writeRecords(mediaRecords, to: "media.json")
+        }
+
+        var updatedMF = mf
+        updatedMF.records.wallpapers = wallpaperRecords.count
+        updatedMF.records.media = mediaRecords.count
+        updatedMF.records.downloads = wallpaperRecords.count + mediaRecords.count
+        try saveManifest(updatedMF)
     }
 
     // MARK: - Path Helpers
