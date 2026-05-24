@@ -268,7 +268,7 @@ struct ContentView: View {
             }
 
             // 延迟2秒后检查更新（自动检查，非强制，避免频繁触发）
-            try? await Task.sleep(nanoseconds: 2 * 1_000_000_000)
+            try? await Task.sleep(nanoseconds: 1_000_000_000)
             let checker = UpdateChecker.shared
             let result = await checker.checkForUpdates(force: false)
             // 只在有更新时显示弹窗，错误或频率限制时静默处理

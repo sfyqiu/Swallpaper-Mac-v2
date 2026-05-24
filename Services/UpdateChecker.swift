@@ -116,10 +116,10 @@ final class UpdateChecker: ObservableObject {
     private let cachedCommitKey = "update_checker_cached_commit"
     private let rateLimitUntilKey = "update_checker_rate_limit_until"
     
-    // 最小检查间隔（秒）- 5分钟
-    private let minCheckInterval: TimeInterval = 300
-    // 遇到 403 后的冷却时间（秒）- 15分钟
-    private let rateLimitCooldown: TimeInterval = 900
+    // 最小检查间隔（秒）- 30秒
+    private let minCheckInterval: TimeInterval = 30
+    // 遇到 403 后的冷却时间（秒）- 2分钟
+    private let rateLimitCooldown: TimeInterval = 120
 
     private init() {
         // ⚠️ 不在 init 中读 UserDefaults，避免 _CFXPreferences 递归栈溢出
@@ -192,7 +192,7 @@ final class UpdateChecker: ObservableObject {
         if let token = UserDefaults.standard.string(forKey: "github_token"), !token.isEmpty {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
-        request.timeoutInterval = 30
+        request.timeoutInterval = 15
 
         do {
             let data = try await NetworkService.shared.fetchData(request: request)
@@ -251,7 +251,7 @@ final class UpdateChecker: ObservableObject {
         if let token = UserDefaults.standard.string(forKey: "github_token"), !token.isEmpty {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
-        request.timeoutInterval = 30
+        request.timeoutInterval = 15
 
         do {
             let data = try await NetworkService.shared.fetchData(request: request)
