@@ -17,6 +17,13 @@
 </p>
 
 <p align="center">
+  <samp>
+    Deeply redeveloped from <a href="https://github.com/jipika/WaifuX"><b>WaifuX</b></a><br>
+    Thanks to the original author for the open-source contribution
+  </samp>
+</p>
+
+<p align="center">
   <a href="https://github.com/sfyqiu/Swallpaper-Mac/releases">
     <img src="https://img.shields.io/github/v/release/sfyqiu/Swallpaper-Mac?color=6366f1&style=flat-square" alt="Release">
   </a>
@@ -66,17 +73,78 @@
 
 | Feature | Status | Description |
 |---------|:------:|-------------|
-| 🖼 **Static Wallpapers** | ✅ | Dual source switching: Wallhaven + 4K Wall, full 4K/8K resolution coverage |
-| 🎬 **Dynamic Wallpapers** | ✅ | Support for MotionBGs and other dynamic background sources — bring your desktop to life |
+| 🖼 **Multi-source Wallpapers** | ✅ | 6 wallpaper sources: Wallhaven / 4K Wallpapers / Unsplash / Pexels / NASA APOD / NASA Images, full 4K/8K coverage |
+| 🎬 **Dynamic Wallpapers** | ✅ | MotionBG + Wallpaper Engine (Scene/Web) — bring your desktop to life |
+| 🎥 **Video Sources** | ✅ | Coverr / Pexels Videos / MotionBG / DongTai multi-source video aggregation |
 | 📺 **Anime Videos** | ✅ | Built-in multi-source parsing engine for streaming and watching anime |
+| ☁️ **Cloud Library Sync** | ✅ | iCloud / OneDrive / Dropbox / Google Drive / Nutstore / Baidu Netdisk, auto/manual sync, batch migration, atomic switching |
 | 🔍 **Smart Search & Filter** | ✅ | Keywords, tags, categories, color, resolution — find exactly what you want |
 | ⭐ **Collections** | ✅ | Save favorite wallpapers and videos to build your personal ACG library |
 | ⚡️ **One-click Apply** | ✅ | Set as desktop wallpaper or dynamic desktop directly while browsing |
 | 🖥️ **Multi-display Support** | ✅ | Set different wallpapers for each display — perfect for multi-monitor setups |
 | 📥 **Local Data Import** | ✅ | Import local wallpaper folders for unified management of personal collections |
-| 🧊 **Wallpaper Engine Rendering (Beta)** | ✅ | Experimental Wallpaper Engine live wallpapers: **scene** (OpenGL) and **Web** (HTML/JS) types, both via the built-in renderer — not a generic “any website as wallpaper” feature<br>⚠️ **Apple Silicon (arm64) only; Intel chips are not supported** |
+| 🧪 **API Connectivity Test** | ✅ | One-click parallel test of all API sources to quickly diagnose network issues |
+| 🚀 **High-performance Cache** | ✅ | Kingfisher smart cache (80MB memory / 500MB disk), concurrent downloads, thumbnail downsampling |
+| 🎨 **UI Refinements** | ✅ | Dark material style, one-click source cycling, instant segmented picker, custom change interval |
+| 🧊 **Wallpaper Engine Rendering (Beta)** | ✅ | Experimental: **Scene** (OpenGL) + **Web** (HTML/JS) via built-in renderer<br>⚠️ **Apple Silicon (arm64) only; Intel not supported** |
 | 🔄 **Auto-updating Rules** | ✅ | Rule configurations loaded remotely via GitHub — quick adaptation when source sites change |
-| ☁️ **Cross-device Sync** | 🚧 | Cloud sync for favorites (in development) |
+
+---
+
+## 🖼 Wallpaper & Video Sources
+
+Swallpaper aggregates public APIs from multiple high-quality sources for a rich content experience.
+
+### Wallpaper Sources
+
+| Source | Type | API Key Required | Where to Get Key |
+|---|:---:|:---:|---|
+| [Wallhaven](https://wallhaven.cc) | Wallpaper | Required | [wallhaven.cc/settings/account](https://wallhaven.cc/settings/account) |
+| [4K Wallpapers](https://4kwallpapers.com) | Wallpaper | Not required | — |
+| [Unsplash](https://unsplash.com) | Wallpaper | Required (demo fallback) | [unsplash.com/developers](https://unsplash.com/developers) |
+| [Pexels](https://www.pexels.com) | Photos + Videos | Required (demo fallback) | [pexels.com/api](https://www.pexels.com/api/) |
+| [NASA APOD](https://apod.nasa.gov) | Astronomy Daily | Optional (DEMO_KEY) | [api.nasa.gov](https://api.nasa.gov/) |
+| [NASA Images](https://images.nasa.gov) | Public Astronomy | Not required | — |
+
+### Video Sources
+
+| Source | Type | API Key Required | Where to Get Key |
+|---|:---:|:---:|---|
+| [Coverr](https://coverr.co) | Free CC0 Videos | Required | [coverr.co/developers](https://coverr.co/developers) |
+| [Pexels Videos](https://www.pexels.com) | Free Stock Videos | Required | [pexels.com/api](https://www.pexels.com/api/) |
+| [MotionBG](https://motionbgs.com) | Live Wallpapers | Not required | — |
+| [Wallpaper Engine](https://store.steampowered.com/app/431960/Wallpaper_Engine/) | Workshop Wallpapers | Not required | — |
+| [DongTai](https://www.dongtai.com) | Dynamic Wallpapers | Not required | — |
+
+> 💡 Enter your API keys in "Settings → API Key" to enable each source. Use the built-in **API Connectivity Test** button to verify all APIs are reachable.
+
+---
+
+## ☁️ Cloud Library Sync
+
+Swallpaper supports syncing your wallpaper and video library to major cloud drives, enabling seamless sharing across multiple Macs.
+
+### Supported Cloud Drives
+
+| Cloud Drive | Auto-detection |
+|-------------|:---:|
+| iCloud Drive | ✅ |
+| OneDrive | ✅ |
+| Dropbox | ✅ |
+| Google Drive | ✅ |
+| Nutstore | ✅ |
+| Baidu Netdisk | ✅ |
+| Custom Path | ✅ |
+
+### Key Features
+
+- **Auto Sync** — Downloads automatically go to cloud directory; all devices have instant access
+- **Manual Sync** — Download locally, trigger migration manually — ideal for limited bandwidth
+- **Batch Migration** — One-click migration of entire existing library to cloud
+- **Atomic Switching** — Switch cloud providers without disable/enable gaps; download paths stay uninterrupted
+- **Error Alerts** — Active alert dialogs when cloud drive is unavailable, instead of silent failures
+
+> 💡 Configure and manage your cloud sync library in "Settings → Cloud Sync".
 
 ---
 

@@ -17,6 +17,13 @@
 </p>
 
 <p align="center">
+  <samp>
+    基于 <a href="https://github.com/jipika/WaifuX"><b>WaifuX</b></a> 深度二次开发<br>
+    感谢原作者的开源贡献
+  </samp>
+</p>
+
+<p align="center">
   <a href="https://github.com/sfyqiu/Swallpaper-Mac/releases">
     <img src="https://img.shields.io/github/v/release/sfyqiu/Swallpaper-Mac?color=6366f1&style=flat-square" alt="Release">
   </a>
@@ -66,17 +73,78 @@
 
 | 功能 | 状态 | 说明 |
 |------|:----:|------|
-| 🖼 **静态壁纸** | ✅ | 双源切换：Wallhaven + 4K Wall，4K/8K 全分辨率覆盖 |
-| 🎬 **动态壁纸** | ✅ | 支持 MotionBGs 等动态背景源，让桌面"活"起来 |
+| 🖼 **多源壁纸** | ✅ | 6 大壁纸源：Wallhaven / 4K Wallpapers / Unsplash / Pexels / NASA APOD / NASA Images，4K/8K 全覆盖 |
+| 🎬 **动态壁纸** | ✅ | MotionBG + Wallpaper Engine（场景/Web），让桌面"活"起来 |
+| 🎥 **视频资源** | ✅ | Coverr / Pexels Videos / MotionBG / DongTai 多源视频聚合 |
 | 📺 **动漫视频** | ✅ | 内置多源解析引擎，追番观影一站式完成 |
+| ☁️ **云盘同步库** | ✅ | iCloud / OneDrive / Dropbox / Google Drive / 坚果云 / 百度网盘，自动/手动同步，批量迁移，原子切换 |
 | 🔍 **智能搜索与筛选** | ✅ | 关键词、标签、分类、颜色、分辨率等多维度筛选 |
 | ⭐ **收藏系统** | ✅ | 收藏喜欢的壁纸、视频，建立个人 ACG 资源库 |
 | ⚡️ **一键设为桌面** | ✅ | 浏览中即可快速设置为桌面壁纸或动态桌面 |
 | 🖥️ **多显示器支持** | ✅ | 支持为每个显示器分别设置不同壁纸，多屏用户福音 |
 | 📥 **本地数据导入** | ✅ | 支持导入本地壁纸文件夹，统一管理个人壁纸收藏 |
-| 🧊 **Wallpaper Engine 渲染 (Beta)** | ✅ | 实验性兼容 Wallpaper Engine 动态壁纸：**场景（Scene）** 与 **Web**（HTML/JS）类型均由内置渲染管线呈现；**不是**「任意网站一键当壁纸」<br>⚠️ **仅支持 Apple Silicon（arm64），Intel 芯片暂不支持** |
+| 🧪 **API 连通性测试** | ✅ | 一键并行测试所有 API 源连通性，快速诊断网络问题 |
+| 🚀 **高性能缓存** | ✅ | Kingfisher 智能缓存（80MB 内存 / 500MB 磁盘）、并发下载、缩略图降采样 |
+| 🎨 **界面优化** | ✅ | 暗色材质风格、一键切换壁纸源、分段选择器即时响应、自定义更换间隔 |
+| 🧊 **Wallpaper Engine 渲染 (Beta)** | ✅ | 实验性兼容：**场景（Scene）** + **Web**（HTML/JS），内置渲染管线<br>⚠️ **仅支持 Apple Silicon（arm64），Intel 暂不支持** |
 | 🔄 **规则自动更新** | ✅ | 通过 GitHub 远程加载规则配置，源站改版可快速适配 |
-| 📱 **跨设备同步** | 🚧 | 收藏夹云端同步（开发中）|
+
+---
+
+## 🖼 壁纸与视频源
+
+Swallpaper 聚合了多个优质壁纸和视频源的公开 API，为用户提供丰富的内容选择。
+
+### 壁纸源
+
+| 源 | 类型 | 需要 API Key | Key 申请地址 |
+|---|:---:|:---:|---|
+| [Wallhaven](https://wallhaven.cc) | 壁纸 | 需要 | [wallhaven.cc/settings/account](https://wallhaven.cc/settings/account) |
+| [4K Wallpapers](https://4kwallpapers.com) | 壁纸 | 无需 | — |
+| [Unsplash](https://unsplash.com) | 壁纸 | 需要（demo 回退） | [unsplash.com/developers](https://unsplash.com/developers) |
+| [Pexels](https://www.pexels.com) | 壁纸 + 视频 | 需要（demo 回退） | [pexels.com/api](https://www.pexels.com/api/) |
+| [NASA APOD](https://apod.nasa.gov) | 天文每日图片 | 可选（DEMO_KEY） | [api.nasa.gov](https://api.nasa.gov/) |
+| [NASA Images](https://images.nasa.gov) | 公开天文图片 | 无需 | — |
+
+### 视频源
+
+| 源 | 类型 | 需要 API Key | Key 申请地址 |
+|---|:---:|:---:|---|
+| [Coverr](https://coverr.co) | 免费 CC0 视频 | 需要 | [coverr.co/developers](https://coverr.co/developers) |
+| [Pexels Videos](https://www.pexels.com) | 免费素材视频 | 需要 | [pexels.com/api](https://www.pexels.com/api/) |
+| [MotionBG](https://motionbgs.com) | 动态壁纸 | 无需 | — |
+| [Wallpaper Engine](https://store.steampowered.com/app/431960/Wallpaper_Engine/) | Workshop 动态壁纸 | 无需 | — |
+| [DongTai](https://www.dongtai.com) | 动态壁纸 | 无需 | — |
+
+> 💡 在「设置 → API Key」中输入对应的 Key 即可启用各源。可使用内置的 **API 连通性测试** 按钮一键验证所有 API 是否可达。
+
+---
+
+## ☁️ 云盘同步库
+
+Swallpaper 支持将壁纸和视频库同步到主流云盘，在多台 Mac 之间无缝共享资源库。
+
+### 支持的云盘
+
+| 云盘 | 自动检测 |
+|------|:---:|
+| iCloud Drive | ✅ |
+| OneDrive | ✅ |
+| Dropbox | ✅ |
+| Google Drive | ✅ |
+| 坚果云 | ✅ |
+| 百度网盘 | ✅ |
+| 自定义路径 | ✅ |
+
+### 核心功能
+
+- **自动同步** — 下载的壁纸/视频自动写入云盘目录，任何设备都能即时访问
+- **手动同步** — 下载到本地，手动触发迁移，适合流量有限的场景
+- **批量迁移** — 一键将现有本地库全部迁移到云盘
+- **原子切换** — 切换云盘时无需先停用再启用，下载路径不会中断
+- **错误弹窗** — 云盘不可用时主动弹窗提醒，而非静默失败
+
+> 💡 在「设置 → 云盘同步」中配置和管理你的云同步库。
 
 ---
 
