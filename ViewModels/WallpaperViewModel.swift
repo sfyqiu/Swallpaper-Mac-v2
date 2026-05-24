@@ -841,7 +841,6 @@ class WallpaperViewModel: ObservableObject {
 
     private func fetchFromFallbackSource(_ source: WallpaperSourceManager.SourceType, parameters: WallhavenAPI.SearchParameters) async throws -> WallpaperSearchResponse {
         switch source {
-        case .fourKWallpapers:
         case .unsplash:
             return try await fetchFromUnsplash(parameters: parameters)
         case .fourKWallpapers:
@@ -1165,7 +1164,6 @@ class WallpaperViewModel: ObservableObject {
     func fetchFeaturedWallpapers() async throws -> [Wallpaper] {
         let sourceManager = WallpaperSourceManager.shared
         switch sourceManager.activeSource {
-        case .fourKWallpapers:
         case .unsplash:
             return try await fetchFromUnsplash(parameters: parameters)
         case .fourKWallpapers:
@@ -1194,7 +1192,6 @@ class WallpaperViewModel: ObservableObject {
     func fetchTopWallpapers() async throws -> [Wallpaper] {
         let sourceManager = WallpaperSourceManager.shared
         switch sourceManager.activeSource {
-        case .fourKWallpapers:
         case .unsplash:
             return try await fetchFromUnsplash(parameters: parameters)
         case .fourKWallpapers:
@@ -1222,7 +1219,6 @@ class WallpaperViewModel: ObservableObject {
     func fetchLatestWallpapers() async throws -> [Wallpaper] {
         let sourceManager = WallpaperSourceManager.shared
         switch sourceManager.activeSource {
-        case .fourKWallpapers:
         case .unsplash:
             return try await fetchFromUnsplash(parameters: parameters)
         case .fourKWallpapers:
