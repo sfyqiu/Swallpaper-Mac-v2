@@ -154,7 +154,7 @@ jobs:
 
                       - 版本号: ${{ steps.version.outputs.version }}
                       - Commit: ${{ github.sha }}
-                  files: build/WaifuX.dmg
+                  files: build/Swallpaper.dmg
                   draft: false
                   prerelease: false
               env:
