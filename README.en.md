@@ -50,20 +50,16 @@
 
 <table width="100%">
   <tr>
-    <td width="50%"><img src="screenshots/home.png" width="100%" /><br><p align="center">Home - Featured</p></td>
-    <td width="50%"><img src="screenshots/wallpaper.png" width="100%" /><br><p align="center">Wallpapers - Smart Filter</p></td>
+    <td width="50%"><img src="screenshots/首页.png" width="100%" /><br><p align="center">Home - Featured</p></td>
+    <td width="50%"><img src="screenshots/壁纸.png" width="100%" /><br><p align="center">Wallpapers - Multi-source</p></td>
   </tr>
   <tr>
-    <td width="50%"><img src="screenshots/wallpaper_detail.png" width="100%" /><br><p align="center">Wallpaper Detail - One-click Set</p></td>
-    <td width="50%"><img src="screenshots/settings.png" width="100%" /><br><p align="center">Settings - Personalization</p></td>
+    <td width="50%"><img src="screenshots/动态壁纸.png" width="100%" /><br><p align="center">Live Wallpapers & Videos</p></td>
+    <td width="50%"><img src="screenshots/不同壁纸源api测试.png" width="100%" /><br><p align="center">API Connectivity Test</p></td>
   </tr>
   <tr>
-    <td width="50%"><img src="screenshots/motionbg.png" width="100%" /><br><p align="center">Live Wallpapers - MotionBG</p></td>
-    <td width="50%"><img src="screenshots/anime_detail.png" width="100%" /><br><p align="center">Anime Detail - Multi-source</p></td>
-  </tr>
-  <tr>
-    <td width="50%"><img src="screenshots/anime_video.png" width="100%" /><br><p align="center">Video Player - Episode Select</p></td>
-    <td width="50%"><img src="screenshots/paging_mode.png" width="100%" /><br><p align="center">My Library - Settings</p></td>
+    <td width="50%"><img src="screenshots/云盘同步.png" width="100%" /><br><p align="center">Cloud Library Sync</p></td>
+    <td width="50%"><img src="screenshots/我的库壁纸.png" width="100%" /><br><p align="center">My Library - Wallpapers</p></td>
   </tr>
 </table>
 

@@ -50,20 +50,16 @@
 
 <table width="100%">
   <tr>
-    <td width="50%"><img src="screenshots/home.png" width="100%" /><br><p align="center">首页 - 精选推荐</p></td>
-    <td width="50%"><img src="screenshots/wallpaper.png" width="100%" /><br><p align="center">壁纸浏览 - 智能筛选</p></td>
+    <td width="50%"><img src="screenshots/首页.png" width="100%" /><br><p align="center">首页 - 精选推荐</p></td>
+    <td width="50%"><img src="screenshots/壁纸.png" width="100%" /><br><p align="center">壁纸浏览 - 多源聚合</p></td>
   </tr>
   <tr>
-    <td width="50%"><img src="screenshots/wallpaper_detail.png" width="100%" /><br><p align="center">壁纸详情 - 一键设置</p></td>
-    <td width="50%"><img src="screenshots/settings.png" width="100%" /><br><p align="center">设置 - 个性化配置</p></td>
+    <td width="50%"><img src="screenshots/动态壁纸.png" width="100%" /><br><p align="center">动态壁纸 · 视频 - 多源聚合</p></td>
+    <td width="50%"><img src="screenshots/不同壁纸源api测试.png" width="100%" /><br><p align="center">API 连通性测试 - 多源管理</p></td>
   </tr>
   <tr>
-    <td width="50%"><img src="screenshots/motionbg.png" width="100%" /><br><p align="center">动态壁纸 - MotionBG</p></td>
-    <td width="50%"><img src="screenshots/anime_detail.png" width="100%" /><br><p align="center">动漫详情 - 多源解析</p></td>
-  </tr>
-  <tr>
-    <td width="50%"><img src="screenshots/anime_video.png" width="100%" /><br><p align="center">视频播放 - 选集管理</p></td>
-    <td width="50%"><img src="screenshots/paging_mode.png" width="100%" /><br><p align="center">我的库 - 设置</p></td>
+    <td width="50%"><img src="screenshots/云盘同步.png" width="100%" /><br><p align="center">云盘同步库 - 多端共享</p></td>
+    <td width="50%"><img src="screenshots/我的库壁纸.png" width="100%" /><br><p align="center">我的库 - 壁纸管理</p></td>
   </tr>
 </table>
 
