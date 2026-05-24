@@ -636,6 +636,29 @@ private var languageBinding: Binding<LocalizationService.Language> {
 private struct CloudSyncSettingsTab: View {
     @ObservedObject var viewModel: SettingsViewModel
     @State private var showDeleteConfirm = false
+    @State private var errorMessage: String?
+    @State private var refreshID = UUID()
+
+    private var detectedProviders: [DetectedCloudProvider] { CloudProviderDetector.detectAll() }
+
+    private func handleEnable(_ provider: CloudProvider, rootURL: URL) {
+        do {
+            try viewModel.cloudSyncService.enable(provider: provider, rootURL: rootURL)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func handleChooseAndEnable(_ provider: CloudProvider) {
+        Task {
+            do {
+                let url = try await viewModel.cloudSyncService.chooseCustomFolder()
+                try viewModel.cloudSyncService.enable(provider: provider, rootURL: url)
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
@@ -683,15 +706,31 @@ private struct CloudSyncSettingsTab: View {
             MacSettingsRow(title: "同步状态", subtitle: statusText, showDivider: false) { EmptyView() }
         }
 
+        MacSettingsSection(header: "同步方式") {
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(CloudSyncMode.allCases, id: \.self) { mode in
+                    HStack(spacing: 10) {
+                        Button {
+                            viewModel.cloudSyncService.syncMode = mode
+                        } label: {
+                            Image(systemName: viewModel.cloudSyncService.syncMode == mode ? "circle.fill" : "circle")
+                                .font(.system(size: 12))
+                                .foregroundStyle(viewModel.cloudSyncService.syncMode == mode ? Color(hex: "54AEFF") : .secondary)
+                        }
+                        .buttonStyle(.plain)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(mode.displayName).font(.system(size: 12, weight: .semibold))
+                            Text(mode.description).font(.system(size: 10)).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, 16).padding(.vertical, 8)
+        }
+
         MacSettingsSection(header: "操作") {
             VStack(alignment: .leading, spacing: 8) {
-                Button("更改目录") {
-                    Task { do {
-                        let url = try await viewModel.cloudSyncService.chooseCustomFolder()
-                        let p = viewModel.cloudSyncService.selectedProvider ?? .custom
-                        try viewModel.cloudSyncService.enable(provider: p, rootURL: url)
-                    } catch { print("[CloudSync] error: \(error)") } }
-                }
+                Button("更改目录") { handleChooseAndEnable(viewModel.cloudSyncService.selectedProvider ?? .custom) }
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(Color(hex: "54AEFF"))
 
@@ -732,32 +771,35 @@ private struct CloudSyncSettingsTab: View {
     @ViewBuilder
     private var disabledStateContent: some View {
         MacSettingsSection(header: "选择云盘") {
+            // 重新扫描按钮
+            HStack {
+                Spacer()
+                Button("重新扫描可用云盘") { refreshID = UUID() }
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(Color(hex: "54AEFF"))
+            }
+            .padding(.horizontal, 16).padding(.top, 4)
+
             VStack(spacing: 8) {
-                ForEach(CloudProvider.allCases) { provider in
-                    let detected = provider.detectRootURL()
+                ForEach(detectedProviders) { item in
+                    let provider = item.provider
+                    let detected = item.detectedURL
                     HStack {
                         Image(systemName: provider.iconName).font(.system(size: 16)).foregroundStyle(.secondary).frame(width: 24)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(provider.displayName).font(.system(size: 13, weight: .semibold))
                             Text(provider.subtitle).font(.system(size: 11)).foregroundStyle(.secondary)
-                            Text(detected?.path ?? "未检测到，请手动选择")
+                            Text(item.isDetected ? (detected?.path ?? "") : "未检测到，请手动选择")
                                 .font(.system(size: 10, weight: .regular, design: .monospaced))
-                                .foregroundStyle(detected != nil ? Color.green.opacity(0.7) : Color.orange)
+                                .foregroundStyle(item.isDetected ? Color.green.opacity(0.7) : Color.orange)
                                 .lineLimit(1).truncationMode(.middle)
                         }
                         Spacer()
                         if let d = detected {
-                            Button("使用") {
-                                do { try viewModel.cloudSyncService.enable(provider: provider, rootURL: d) } catch {}
-                            }
+                            Button("使用") { handleEnable(provider, rootURL: d) }
                             .buttonStyle(.plain).font(.system(size: 11, weight: .semibold)).foregroundStyle(Color(hex: "54AEFF"))
                         }
-                        Button("选择...") {
-                            Task { do {
-                                let u = try await viewModel.cloudSyncService.chooseCustomFolder()
-                                try viewModel.cloudSyncService.enable(provider: provider, rootURL: u)
-                            } catch {} }
-                        }
+                        Button("选择...") { handleChooseAndEnable(provider) }
                         .buttonStyle(.plain).font(.system(size: 11, weight: .semibold)).foregroundStyle(.secondary)
                     }
                     .padding(.horizontal, 12).padding(.vertical, 10)

@@ -18,6 +18,7 @@ final class CloudLibrarySyncService: ObservableObject {
     private let providerKey = "cloud_sync_provider"
     private let enabledKey = "cloud_sync_enabled"
     private let libraryURLBookmarkKey = "cloud_sync_library_url_bookmark"
+    private let syncModeKey = "cloud_sync_mode"
 
     // MARK: - Published State
     @Published var isEnabled: Bool = false
@@ -25,6 +26,9 @@ final class CloudLibrarySyncService: ObservableObject {
     @Published var libraryURL: URL?
     @Published var status: CloudLibrarySyncStatus = .disabled
     @Published var manifest: CloudLibraryManifest?
+    @Published var syncMode: CloudSyncMode = .auto {
+        didSet { UserDefaults.standard.set(syncMode.rawValue, forKey: syncModeKey) }
+    }
 
     // MARK: - Internal State
     private var cachedAccessURL: URL?
@@ -42,6 +46,10 @@ final class CloudLibrarySyncService: ObservableObject {
         if let raw = defaults.string(forKey: providerKey),
            let provider = CloudProvider(rawValue: raw) {
             selectedProvider = provider
+        }
+        if let modeRaw = defaults.string(forKey: syncModeKey),
+           let mode = CloudSyncMode(rawValue: modeRaw) {
+            syncMode = mode
         }
         if isEnabled, let bookmarkData = defaults.data(forKey: libraryURLBookmarkKey) {
             do {

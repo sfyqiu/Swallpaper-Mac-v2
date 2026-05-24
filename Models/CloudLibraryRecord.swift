@@ -54,6 +54,27 @@ struct CloudLibraryScanResult {
     }
 }
 
+// MARK: - 同步模式
+
+enum CloudSyncMode: String, Codable, CaseIterable {
+    case auto = "auto"
+    case manual = "manual"
+
+    var displayName: String {
+        switch self {
+        case .auto: return "自动同步"
+        case .manual: return "手动同步"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .auto: return "新下载自动保存到云盘目录"
+        case .manual: return "下载到本地，手动触发迁移"
+        }
+    }
+}
+
 // MARK: - 同步状态
 
 enum CloudLibrarySyncStatus: Equatable {

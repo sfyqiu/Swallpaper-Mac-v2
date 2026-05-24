@@ -217,9 +217,9 @@ final class DownloadPathManager {
     }
 
     func destinationFolder(for type: ContentType) -> URL {
-        // 云盘同步已启用时，使用云盘目录
+        // 云盘同步已启用 + 自动同步模式时，使用云盘目录
         let cloudSync = CloudLibrarySyncService.shared
-        if cloudSync.isEnabled, let _ = cloudSync.libraryURL {
+        if cloudSync.isEnabled, cloudSync.syncMode == .auto, let _ = cloudSync.libraryURL {
             switch type {
             case .wallpaper:
                 return cloudSync.libraryURL!.appendingPathComponent("files/wallpapers", isDirectory: true)
