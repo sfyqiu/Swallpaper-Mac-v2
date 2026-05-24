@@ -146,7 +146,7 @@ private struct HomeTabPage: View {
     @ObservedObject var mediaViewModel: MediaExploreViewModel
 
     var body: some View {
-        HomeContentView(
+        DashboardHomeView(
             viewModel: wallpaperViewModel,
             mediaViewModel: mediaViewModel,
             selectedWallpaper: navigationState.binding(for: \.selectedWallpaper),
