@@ -51,30 +51,18 @@ class SettingsViewModel: ObservableObject {
         apiTestResults = []
         defer { isTestingAPI = false }
 
-        let results = await withTaskGroup(of: (String, Bool, String).self) { group in
-            group.addTask { @MainActor in
-                let r = await UnsplashService.shared.testConnection()
-                return ("Unsplash", r.success, r.message)
-            }
-            group.addTask { @MainActor in
-                let r = await PexelsService.shared.testConnection()
-                return ("Pexels", r.success, r.message)
-            }
-            group.addTask { @MainActor in
-                let r = await CoverrService.shared.testConnection()
-                return ("Coverr", r.success, r.message)
-            }
-            group.addTask { @MainActor in
-                let r = await NASAService.shared.testConnection()
-                return ("NASA APOD", r.success, r.message)
-            }
-            var collected: [(String, Bool, String)] = []
-            for await result in group {
-                collected.append(result)
-            }
-            return collected
-        }
-        apiTestResults = results
+        async let r1 = UnsplashService.shared.testConnection()
+        async let r2 = PexelsService.shared.testConnection()
+        async let r3 = CoverrService.shared.testConnection()
+        async let r4 = NASAService.shared.testConnection()
+
+        let (u, p, c, n) = await (r1, r2, r3, r4)
+        apiTestResults = [
+            ("Unsplash", u.success, u.message),
+            ("Pexels", p.success, p.message),
+            ("Coverr", c.success, c.message),
+            ("NASA APOD", n.success, n.message),
+        ]
     }
 
     @Published var proxyEnabled = false { didSet { UserDefaults.standard.set(proxyEnabled, forKey: "proxy_enabled"); syncProxySettings() } }
