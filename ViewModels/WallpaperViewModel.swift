@@ -52,7 +52,7 @@ class WallpaperViewModel: ObservableObject {
     @Published var purityNSFW = false
 
     // 排序选项
-    @Published var sortingOption: SortingOption = .dateAdded
+    @Published var sortingOption: SortingOption = .toplist
     @Published var orderDescending = true
 
     // TopRange (用于 toplist 排序)
@@ -62,7 +62,7 @@ class WallpaperViewModel: ObservableObject {
     @Published var selectedResolutions: [String] = []
     @Published var selectedRatios: [String] = []
     @Published var selectedColors: [String] = []
-    @Published var atleastResolution: String? = nil  // 最小分辨率，如 "3840x2160"
+    @Published var atleastResolution: String? = "1920x1080"  // 最小分辨率，如 "3840x2160"
     @Published var selected4KCategorySlug: String? = nil  // 4K 源的分类 slug（如 "anime", "nature"）
     @Published var selected4KSorting: FourKSortingOption = .latest  // 4K 源的排序方式
 
