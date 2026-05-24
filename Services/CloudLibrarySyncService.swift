@@ -166,7 +166,7 @@ final class CloudLibrarySyncService: ObservableObject {
             throw CloudSyncError.manifestMissing
         }
         let data = try Data(contentsOf: url)
-        return try JSONDecoder().decode(CloudLibraryManifest.self, from: data)
+        return try jsonDecoder.decode(CloudLibraryManifest.self, from: data)
     }
 
     func saveManifest(_ manifest: CloudLibraryManifest) throws {
@@ -410,7 +410,7 @@ final class CloudLibrarySyncService: ObservableObject {
 
     func readRecords(from url: URL) throws -> [CloudLibraryRecord] {
         let data = try Data(contentsOf: url)
-        return try JSONDecoder().decode([CloudLibraryRecord].self, from: data)
+        return try jsonDecoder.decode([CloudLibraryRecord].self, from: data)
     }
 
     // MARK: - Atomic JSON Write
