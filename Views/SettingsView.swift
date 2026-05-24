@@ -715,23 +715,18 @@ private struct CloudSyncSettingsTab: View {
         }
 
         MacSettingsSection(header: "同步方式") {
-            VStack(alignment: .leading, spacing: 8) {
-                ForEach(CloudSyncMode.allCases, id: \.self) { mode in
-                    HStack(spacing: 10) {
-                        Button {
-                            viewModel.cloudSyncService.syncMode = mode
-                        } label: {
-                            Image(systemName: viewModel.cloudSyncService.syncMode == mode ? "circle.fill" : "circle")
-                                .font(.system(size: 12))
-                                .foregroundStyle(viewModel.cloudSyncService.syncMode == mode ? Color(hex: "54AEFF") : .secondary)
-                        }
-                        .buttonStyle(.plain)
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(mode.displayName).font(.system(size: 12, weight: .semibold))
-                            Text(mode.description).font(.system(size: 10)).foregroundStyle(.secondary)
-                        }
+            VStack(alignment: .leading, spacing: 6) {
+                Picker("", selection: $viewModel.cloudSyncService.syncMode) {
+                    ForEach(CloudSyncMode.allCases, id: \.self) { mode in
+                        Text(mode.displayName).tag(mode)
                     }
                 }
+                .pickerStyle(.segmented)
+                .frame(width: 200)
+
+                Text(viewModel.cloudSyncService.syncMode.description)
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
             }
             .padding(.horizontal, 16).padding(.vertical, 8)
         }
