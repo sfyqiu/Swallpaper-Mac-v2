@@ -638,8 +638,11 @@ private struct CloudSyncSettingsTab: View {
     @State private var showDeleteConfirm = false
     @State private var errorMessage: String?
     @State private var refreshID = UUID()
+    @State private var cachedProviders: [DetectedCloudProvider] = CloudProviderDetector.detectAll()
 
-    private var detectedProviders: [DetectedCloudProvider] { CloudProviderDetector.detectAll() }
+    private func refreshDetectedProviders() {
+        cachedProviders = CloudProviderDetector.detectAll()
+    }
 
     private func handleEnable(_ provider: CloudProvider, rootURL: URL) {
         do {
@@ -785,14 +788,14 @@ private struct CloudSyncSettingsTab: View {
             // 重新扫描按钮
             HStack {
                 Spacer()
-                Button("重新扫描可用云盘") { refreshID = UUID() }
+                Button("重新扫描可用云盘") { refreshDetectedProviders() }
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(Color(hex: "54AEFF"))
             }
             .padding(.horizontal, 16).padding(.top, 4)
 
             VStack(spacing: 8) {
-                ForEach(detectedProviders) { item in
+                ForEach(cachedProviders) { item in
                     let provider = item.provider
                     let detected = item.detectedURL
                     HStack {
@@ -1034,6 +1037,24 @@ private struct SchedulerSettingsTab: View {
                                         .foregroundStyle(Color.white.opacity(0.6))
                                 }
                                 .menuStyle(.borderlessButton)
+
+                                // 自定义时间
+                                HStack(spacing: 6) {
+                                    Text("自定义:")
+                                        .font(.system(size: 11, weight: .medium))
+                                        .foregroundStyle(Color.white.opacity(0.5))
+                                    TextField("分钟", value: Binding(
+                                        get: { displayConfig.intervalMinutes > 0 ? displayConfig.intervalMinutes : 60 },
+                                        set: { viewModel.schedulerViewModel.updateDisplayInterval(max(1, $0), for: screenID) }
+                                    ), format: .number)
+                                        .textFieldStyle(.plain)
+                                        .font(.system(size: 11, weight: .medium, design: .monospaced))
+                                        .foregroundStyle(Color.white.opacity(0.8))
+                                        .frame(width: 50)
+                                    Text("分钟")
+                                        .font(.system(size: 11, weight: .regular))
+                                        .foregroundStyle(Color.white.opacity(0.4))
+                                }
                             }
                             .padding(.horizontal, 16)
                             .padding(.vertical, 12)
