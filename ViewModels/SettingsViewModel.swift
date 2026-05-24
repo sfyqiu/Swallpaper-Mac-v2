@@ -89,6 +89,9 @@ class SettingsViewModel: ObservableObject {
     private let ruleRepository = RuleRepository.shared
     private var cancellables = Set<AnyCancellable>()
 
+    // MARK: - 云盘同步库
+    @Published var cloudSyncService = CloudLibrarySyncService.shared
+
     // MARK: - 调度器相关（延迟初始化，避免启动时阻塞）
     private var _schedulerViewModel: WallpaperSchedulerViewModel?
     private var _downloadTaskViewModel: DownloadTaskViewModel?
@@ -169,6 +172,9 @@ class SettingsViewModel: ObservableObject {
         proxyEnabled = defaults.bool(forKey: "proxy_enabled")
         proxyHost = defaults.string(forKey: "proxy_host") ?? ""
         proxyPort = defaults.string(forKey: "proxy_port") ?? ""
+
+        // 恢复云盘同步库状态
+        cloudSyncService.restoreState()
 
         // 恢复 API Key 缓存
         Self._cachedAPIKey = defaults.string(forKey: apiKeyUserDefaultsKey)
