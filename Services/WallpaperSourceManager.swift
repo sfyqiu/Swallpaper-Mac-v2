@@ -19,12 +19,17 @@ class WallpaperSourceManager: ObservableObject {
         case wallhaven = "wallhaven"
         case fourKWallpapers = "4kwallpapers"
         case unsplash = "unsplash"
+        case pexels = "pexels"
+        case nasa = "nasa"
 
         var displayName: String {
             switch self {
             case .wallhaven: return "WallHaven"
             case .fourKWallpapers: return "4K Wallpapers"
             case .unsplash: return "Unsplash"
+            case .pexels: return "Pexels"
+            case .nasa: return "NASA APOD"
+            case .pexels: return "Pexels"
             }
         }
 
@@ -33,6 +38,9 @@ class WallpaperSourceManager: ObservableObject {
             case .wallhaven: return t("source.official")
             case .fourKWallpapers: return t("source.fallback")
             case .unsplash: return "Unsplash"
+            case .pexels: return "Pexels"
+            case .pexels: return "Pexels"
+            case .nasa: return "NASA"
             }
         }
 
@@ -41,6 +49,8 @@ class WallpaperSourceManager: ObservableObject {
             switch self {
             case .wallhaven: return .fourKWallpapers
             case .fourKWallpapers: return .unsplash
+            case .pexels: return .nasa
+            case .nasa: return .nasa
             case .unsplash: return .unsplash
             }
         }
@@ -51,6 +61,8 @@ class WallpaperSourceManager: ObservableObject {
             case .wallhaven: return true
             case .fourKWallpapers: return false
             case .unsplash: return false
+            case .pexels: return false
+            case .nasa: return false
             }
         }
 
@@ -60,6 +72,8 @@ class WallpaperSourceManager: ObservableObject {
             case .wallhaven: return true
             case .fourKWallpapers: return false
             case .unsplash: return false
+            case .pexels: return false
+            case .nasa: return false
             }
         }
 
@@ -69,6 +83,8 @@ class WallpaperSourceManager: ObservableObject {
             case .wallhaven: return true
             case .fourKWallpapers: return false
             case .unsplash: return false
+            case .pexels: return false
+            case .nasa: return false
             }
         }
 
@@ -78,6 +94,8 @@ class WallpaperSourceManager: ObservableObject {
             case .wallhaven: return true
             case .fourKWallpapers: return false
             case .unsplash: return true
+            case .pexels: return true
+            case .nasa: return false
             }
         }
 
@@ -87,6 +105,8 @@ class WallpaperSourceManager: ObservableObject {
             case .wallhaven: return true
             case .fourKWallpapers: return false
             case .unsplash: return false
+            case .pexels: return false
+            case .nasa: return false
             }
         }
 
@@ -96,6 +116,8 @@ class WallpaperSourceManager: ObservableObject {
             case .wallhaven: return "blue"
             case .fourKWallpapers: return "orange"
             case .unsplash: return "green"
+            case .pexels: return "teal"
+            case .nasa: return "indigo"
             }
         }
     }

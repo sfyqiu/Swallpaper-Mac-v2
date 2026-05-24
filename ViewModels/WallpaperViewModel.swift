@@ -798,6 +798,10 @@ class WallpaperViewModel: ObservableObject {
             return try await fetchFromWallhaven(parameters: parameters)
         case .fourKWallpapers:
             return try await fetchFromFallbackSource(.fourKWallpapers, parameters: parameters)
+        case .pexels:
+            return try await fetchFromPexels(parameters: parameters)
+        case .nasa:
+            return try await fetchFromNASA(parameters: parameters)
         case .unsplash:
             return try await fetchFromUnsplash(parameters: parameters)
         }
@@ -1167,6 +1171,11 @@ class WallpaperViewModel: ObservableObject {
     func fetchFeaturedWallpapers() async throws -> [Wallpaper] {
         let sourceManager = WallpaperSourceManager.shared
         switch sourceManager.activeSource {
+        case .pexels:
+            let pexelsPhotos = try await PexelsService.shared.fetchCurated(page: 1, perPage: 24)
+            return pexelsPhotos
+        case .nasa:
+            return try await NASAService.shared.fetchRecent(count: 24)
         case .unsplash:
             let p = WallhavenAPI.SearchParameters(query: "", page: 1)
             return try await fetchFromUnsplash(parameters: p).data
@@ -1196,6 +1205,10 @@ class WallpaperViewModel: ObservableObject {
     func fetchTopWallpapers() async throws -> [Wallpaper] {
         let sourceManager = WallpaperSourceManager.shared
         switch sourceManager.activeSource {
+        case .pexels:
+            return try await PexelsService.shared.fetchCurated(page: 1, perPage: 8)
+        case .nasa:
+            return try await NASAService.shared.fetchRecent(count: 8)
         case .unsplash:
             let p = WallhavenAPI.SearchParameters(query: "", page: 1)
             return try await fetchFromUnsplash(parameters: p).data
@@ -1224,6 +1237,10 @@ class WallpaperViewModel: ObservableObject {
     func fetchLatestWallpapers() async throws -> [Wallpaper] {
         let sourceManager = WallpaperSourceManager.shared
         switch sourceManager.activeSource {
+        case .pexels:
+            return try await PexelsService.shared.fetchCurated(page: 1, perPage: 8)
+        case .nasa:
+            return try await NASAService.shared.fetchRecent(count: 8)
         case .unsplash:
             let p = WallhavenAPI.SearchParameters(query: "", page: 1)
             return try await fetchFromUnsplash(parameters: p).data
