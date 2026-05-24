@@ -271,7 +271,7 @@ This application is provided **"AS IS"**, and the developer assumes no liability
 
 <p align="center">
   <samp>
-    Made with 💜 by <a href="https://github.com/jipika">@sfyqiu</a>
+    Made with 💜 by <a href="https://github.com/sfyqiu">@sfyqiu</a>
   </samp>
 </p>
 

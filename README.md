@@ -271,7 +271,7 @@ Swallpaper **并非 Wallpaper Engine 官方产品**，与 Valve Corporation、Kr
 
 <p align="center">
   <samp>
-    Made with 💜 by <a href="https://github.com/jipika">@sfyqiu</a>
+    Made with 💜 by <a href="https://github.com/sfyqiu">@sfyqiu</a>
   </samp>
 </p>
 

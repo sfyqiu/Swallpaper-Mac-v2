@@ -17,20 +17,20 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/sfyqiu/Swallpaper-Mac-v2-v2/releases">
-    <img src="https://img.shields.io/github/v/release/sfyqiu/Swallpaper-Mac-v2?color=6366f1&style=flat-square" alt="Release">
+  <a href="https://github.com/sfyqiu/Swallpaper-Mac/releases">
+    <img src="https://img.shields.io/github/v/release/sfyqiu/Swallpaper-Mac?color=6366f1&style=flat-square" alt="Release">
   </a>
   <a href="LICENSE">
     <img src="https://img.shields.io/badge/License-GPL--3.0-06b6d4?style=flat-square" alt="License">
   </a>
-  <a href="https://github.com/sfyqiu/Swallpaper-Mac-v2/stargazers">
-    <img src="https://img.shields.io/github/stars/sfyqiu/Swallpaper-Mac-v2?color=f59e0b&style=flat-square" alt="Stars">
+  <a href="https://github.com/sfyqiu/Swallpaper-Mac/stargazers">
+    <img src="https://img.shields.io/github/stars/sfyqiu/Swallpaper-Mac?color=f59e0b&style=flat-square" alt="Stars">
   </a>
-  <a href="https://github.com/sfyqiu/Swallpaper-Mac-v2/forks">
-    <img src="https://img.shields.io/github/forks/sfyqiu/Swallpaper-Mac-v2?color=10b981&style=flat-square" alt="Forks">
+  <a href="https://github.com/sfyqiu/Swallpaper-Mac/forks">
+    <img src="https://img.shields.io/github/forks/sfyqiu/Swallpaper-Mac?color=10b981&style=flat-square" alt="Forks">
   </a>
-  <a href="https://github.com/sfyqiu/Swallpaper-Mac-v2-v2/releases">
-    <img src="https://img.shields.io/github/downloads/sfyqiu/Swallpaper-Mac-v2/total?color=8b5cf6&style=flat-square" alt="Downloads">
+  <a href="https://github.com/sfyqiu/Swallpaper-Mac/releases">
+    <img src="https://img.shields.io/github/downloads/sfyqiu/Swallpaper-Mac/total?color=8b5cf6&style=flat-square" alt="Downloads">
   </a>
   <a href="https://sfyqiu.github.io/Swallpaper-Mac">
     <img src="https://img.shields.io/badge/Website-🌐-ec4899?style=flat-square" alt="Website">
@@ -88,7 +88,7 @@
 
 ### 方法2：GitHub Releases
 
-👉 **[Releases](https://github.com/sfyqiu/Swallpaper-Mac-v2-v2/releases)**
+👉 **[Releases](https://github.com/sfyqiu/Swallpaper-Mac/releases)**
 
 ### 方法3：Homebrew
 
@@ -120,7 +120,7 @@ Swallpaper の主要データソースである [Wallhaven](https://wallhaven.cc
 
 Swallpaper はダイナミックルールシステムを採用しており、スクレイピングロジックとクライアントを分離しています：
 
-- ルールは独立リポジトリで管理：**[Swallpaper-Profiles](https://github.com/sfyqiu/Swallpaper-Mac-v2-Profiles)**
+- ルールは独立リポジトリで管理：**[Swallpaper-Profiles](https://github.com/sfyqiu/Swallpaper-Mac-Profiles)**
 - アプリ起動時に最新ルールを自動同期
 - ユーザーによるカスタムルールインポートに対応
 - ソースサイトのレイアウト変更時、ルールのみ更新すれば適応可能（アプリ再リリース不要）
@@ -147,16 +147,9 @@ Swallpaper はダイナミックルールシステムを採用しており、ス
 
 Swallpaper は**完全無料のオープンソース**個人プロジェクトです。ネイティブ macOS アプリケーションの開発と保守には多大な時間と労力がかかります — UI デザイン、機能実装、バグ修正、ルール適配まで、すべてのバージョンは継続的な個人的な取り組みによって作られています。
 
-もし Swallpaper がお役に立ったなら、プロジェクトの継続的な発展を支援することをぜひご検討ください：
+もし Swallpaper がお役に立ったなら、**スター ⭐️ を付けるだけ**でも大きな励みになります！
 
-<p align="center">
-  <img src="" width="280" alt="WeChat 報酬QRコード" />
-  <img src="afdian_" width="280" alt="Afdian スポンサーQRコード" />
-</p>
-
-もちろん、**スター ⭐️ を付けるだけ**でも大きな励みになります！
-
-すべてのサポートが、このアプリを維持・改善し続ける原動力になります。Swallpaper をご利用いただきありがとうございます 💜
+Swallpaper をご利用いただきありがとうございます 💜
 
 ---
 
@@ -207,7 +200,7 @@ Swallpaper は **Wallpaper Engine の公式製品ではありません**。Valve
 ## 🌟 Star 履歴
 
 <p align="center">
-  <img src="https://api.star-history.com/svg?repos=sfyqiu/Swallpaper-Mac-v2&type=Date" alt="Star History Chart">
+  <img src="https://api.star-history.com/svg?repos=sfyqiu/Swallpaper-Mac&type=Date" alt="Star History Chart">
 </p>
 
 ---
@@ -219,7 +212,7 @@ Swallpaper は **Wallpaper Engine の公式製品ではありません**。Valve
 </p>
 
 <p align="center">
-  <a href="https://github.com/sfyqiu/Swallpaper-Mac-v2/stargazers">
-    <img src="https://img.shields.io/github/stars/sfyqiu/Swallpaper-Mac-v2?style=social" alt="Stars">
+  <a href="https://github.com/sfyqiu/Swallpaper-Mac/stargazers">
+    <img src="https://img.shields.io/github/stars/sfyqiu/Swallpaper-Mac?style=social" alt="Stars">
   </a>
 </p>

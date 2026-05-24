@@ -1272,6 +1272,7 @@ private struct AboutSettingsTab: View {
 
                 // 项目信息组
                 MacSettingsSection(header: t("projectInfo")) {
+                    infoRow(title: t("version"), value: viewModel.appVersion, isLast: false)
                     infoRow(title: t("developer"), value: "Swallpaper", isLast: false)
                     infoRow(title: t("wallpaperRuleSource"), value: wallpaperRuleSourceText, isLast: false)
                     infoRow(title: t("animeRuleSource"), value: "KazumiRules", isLast: false)
@@ -1280,8 +1281,16 @@ private struct AboutSettingsTab: View {
 
                 // 链接组
                 MacSettingsSection(header: t("links")) {
+                    MacLinkRow(title: t("openSourceRepo"), action: {
+                        if let url = URL(string: "https://github.com/sfyqiu/Swallpaper-Mac") {
+                            NSWorkspace.shared.open(url)
+                        }
+                    })
+
+                    Divider().background(Color.white.opacity(0.06)).padding(.leading, 16)
+
                     MacLinkRow(title: t("visitWebsite"), action: {
-                        if let url = URL(string: "https://github.com/sfyqiu/Swallpaper-Mac-v2") {
+                        if let url = URL(string: "https://sfyqiu.github.io/Swallpaper-Mac") {
                             NSWorkspace.shared.open(url)
                         }
                     })
@@ -1289,7 +1298,7 @@ private struct AboutSettingsTab: View {
                     Divider().background(Color.white.opacity(0.06)).padding(.leading, 16)
 
                     MacLinkRow(title: t("reportProblem"), action: {
-                        if let url = URL(string: "https://github.com/sfyqiu/Swallpaper-Mac-v2/issues") {
+                        if let url = URL(string: "https://github.com/sfyqiu/Swallpaper-Mac/issues") {
                             NSWorkspace.shared.open(url)
                         }
                     })
@@ -1638,7 +1647,7 @@ struct SettingsUpdateSection: View {
             tagName: "v38.0.25",
             name: "Swallpaper 38.0.25",
             body: "修复了一些问题",
-            htmlUrl: "https://github.com/sfyqiu/Swallpaper-Mac-v2/releases/tag/v1.3.0",
+            htmlUrl: "https://github.com/sfyqiu/Swallpaper-Mac/releases/tag/v1.3.0",
             publishedAt: "2024-01-01T00:00:00Z",
             prerelease: false,
             draft: false,
