@@ -72,7 +72,7 @@ struct DashboardHomeView: View {
                 if let idx = sources.firstIndex(of: WallpaperSourceManager.shared.activeSource) {
                     let next = sources[(idx + 1) % sources.count]
                     WallpaperSourceManager.shared.switchTo(next)
-                    Task { await viewModel.loadInitialData() }
+                    Task { await viewModel.initialLoad() }
                 }
             } label: {
                 Image(systemName: "arrow.triangle.2.circlepath")
@@ -262,10 +262,9 @@ struct DashboardHomeView: View {
         )
         return ExploreDynamicAtmosphereBackground(
             tint: tint,
-            sourceImageMirrorURL: nil,
-            intensity: ExploreAtmosphereIntensity(ambient: 0.12, blur: 0.6, accentGlow: 0.3, vibrancy: 0.15, gradientBase: 0.3),
-            isLightMode: arcSettings.isLightMode,
-            useNoise: arcSettings.grainTextureEnabled
+            referenceImage: atmosphereController.referenceImage,
+            lightweightBackdrop: false
         )
+        .ignoresSafeArea()
     }
 }
