@@ -1,4 +1,5 @@
 import Foundation
+import AppKit
 
 // MARK: - 云盘同步库核心服务
 

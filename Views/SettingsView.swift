@@ -712,13 +712,16 @@ private var languageBinding: Binding<LocalizationService.Language> {
     }
 
     private var statusLabel: some View {
-        switch viewModel.cloudSyncService.status {
-        case .disabled: return Text("未启用").font(.system(size: 11, weight: .semibold)).foregroundStyle(.secondary)
-        case .ready: return Text("就绪").font(.system(size: 11, weight: .semibold)).foregroundStyle(.green)
-        case .scanning: return Text("扫描中").font(.system(size: 11, weight: .semibold)).foregroundStyle(.yellow)
-        case .migrating: return Text("迁移中").font(.system(size: 11, weight: .semibold)).foregroundStyle(.orange)
-        case .error(let m): return Text(m).font(.system(size: 11, weight: .semibold)).foregroundStyle(Color(hex: "FF453A"))
-        }
+        let (text, color): (String, Color) = {
+            switch viewModel.cloudSyncService.status {
+            case .disabled: return ("未启用", .secondary)
+            case .ready: return ("就绪", .green)
+            case .scanning: return ("扫描中", .yellow)
+            case .migrating: return ("迁移中", .orange)
+            case .error(let m): return (m, Color(hex: "FF453A"))
+            }
+        }()
+        return Text(text).font(.system(size: 11, weight: .semibold)).foregroundStyle(color)
     }
 }
 
