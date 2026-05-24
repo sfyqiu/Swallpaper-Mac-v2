@@ -1,8 +1,5 @@
 import SwiftUI
 
-// 导入 ThemeManager（如果可用）
-// 注意：ThemeManager 定义在 DesignSystem/ThemeManager.swift 中
-
 // MARK: - Liquid Glass 设计系统
 // 基于 Apple 官方 Liquid Glass API (macOS 26+) 的兼容实现
 // 文档: https://developer.apple.com/documentation/swiftui/applying-liquid-glass-to-custom-views/
@@ -18,110 +15,50 @@ public enum LiquidGlassColors {
     public static let onlineGreen = Color(hex: "34D399")
     public static let warningOrange = Color(hex: "FF9F43")
 
-    // 背景色（随主题变化，默认为深色）
-    @MainActor
-    public static var deepBackground: Color {
-        ThemeManager.shared.isDarkMode ? Color(hex: "0D0D0D") : Color(hex: "F5F5F7")
-    }
+    // 背景色（仅深色模式）
+    public static let deepBackground = Color(hex: "0D0D0D")
     
-    @MainActor
-    public static var midBackground: Color {
-        ThemeManager.shared.isDarkMode ? Color(hex: "12121F") : Color(hex: "EBEBF0")
-    }
+    public static let midBackground = Color(hex: "12121F")
     
-    @MainActor
-    public static var surfaceBackground: Color {
-        ThemeManager.shared.isDarkMode ? Color(hex: "1A1A2E") : Color(hex: "FFFFFF")
-    }
+    public static let surfaceBackground = Color(hex: "1A1A2E")
     
-    @MainActor
-    public static var elevatedBackground: Color {
-        ThemeManager.shared.isDarkMode ? Color(hex: "1E1E28") : Color(hex: "F0F0F5")
-    }
+    public static let elevatedBackground = Color(hex: "1E1E28")
 
-    // 玻璃效果颜色（随主题变化）
-    @MainActor
-    public static var glassWhite: Color {
-        ThemeManager.shared.isDarkMode ? Color.white.opacity(0.26) : Color.black.opacity(0.12)
-    }
+    // 玻璃效果颜色（仅深色模式）
+    public static let glassWhite = Color.white.opacity(0.26)
     
-    @MainActor
-    public static var glassWhiteLight: Color {
-        ThemeManager.shared.isDarkMode ? Color.white.opacity(0.34) : Color.black.opacity(0.16)
-    }
+    public static let glassWhiteLight = Color.white.opacity(0.34)
     
-    @MainActor
-    public static var glassWhiteSubtle: Color {
-        ThemeManager.shared.isDarkMode ? Color.white.opacity(0.16) : Color.black.opacity(0.08)
-    }
+    public static let glassWhiteSubtle = Color.white.opacity(0.16)
     
-    @MainActor
-    public static var glassBorder: Color {
-        ThemeManager.shared.isDarkMode ? Color.white.opacity(0.34) : Color.black.opacity(0.2)
-    }
+    public static let glassBorder = Color.white.opacity(0.34)
     
-    @MainActor
-    public static var glassBorderLight: Color {
-        ThemeManager.shared.isDarkMode ? Color.white.opacity(0.46) : Color.black.opacity(0.24)
-    }
+    public static let glassBorderLight = Color.white.opacity(0.46)
     
-    @MainActor
-    public static var glassWhiteStrong: Color {
-        ThemeManager.shared.isDarkMode ? Color.white.opacity(0.42) : Color.black.opacity(0.22)
-    }
+    public static let glassWhiteStrong = Color.white.opacity(0.42)
     
-    @MainActor
-    public static var glassTint: Color {
-        ThemeManager.shared.isDarkMode ? Color.white.opacity(0.12) : Color.black.opacity(0.05)
-    }
+    public static let glassTint = Color.white.opacity(0.12)
 
     // 玻璃高光
-    @MainActor
-    public static var glassHighlight: Color {
-        ThemeManager.shared.isDarkMode ? Color.white.opacity(0.7) : Color.black.opacity(0.36)
-    }
+    public static let glassHighlight = Color.white.opacity(0.7)
     
-    @MainActor
-    public static var glassHighlightSubtle: Color {
-        ThemeManager.shared.isDarkMode ? Color.white.opacity(0.4) : Color.black.opacity(0.2)
-    }
+    public static let glassHighlightSubtle = Color.white.opacity(0.4)
 
-    // 文字颜色（随主题变化）
-    @MainActor
-    public static var textPrimary: Color {
-        ThemeManager.shared.isDarkMode ? Color.white : Color(hex: "1A1A1A")
-    }
+    // 文字颜色（仅深色模式）
+    public static let textPrimary = Color.white
     
-    @MainActor
-    public static var textSecondary: Color {
-        ThemeManager.shared.isDarkMode ? Color.white.opacity(0.7) : Color(hex: "666666")
-    }
+    public static let textSecondary = Color.white.opacity(0.7)
     
-    @MainActor
-    public static var textTertiary: Color {
-        ThemeManager.shared.isDarkMode ? Color.white.opacity(0.5) : Color(hex: "999999")
-    }
+    public static let textTertiary = Color.white.opacity(0.5)
     
-    @MainActor
-    public static var textQuaternary: Color {
-        ThemeManager.shared.isDarkMode ? Color.white.opacity(0.3) : Color(hex: "BBBBBB")
-    }
+    public static let textQuaternary = Color.white.opacity(0.3)
 
     // 边框颜色
-    @MainActor
-    public static var borderSubtle: Color {
-        ThemeManager.shared.isDarkMode ? Color.white.opacity(0.1) : Color.black.opacity(0.08)
-    }
+    public static let borderSubtle = Color.white.opacity(0.1)
     
-    @MainActor
-    public static var borderDefault: Color {
-        ThemeManager.shared.isDarkMode ? Color.white.opacity(0.2) : Color.black.opacity(0.12)
-    }
+    public static let borderDefault = Color.white.opacity(0.2)
     
-    @MainActor
-    public static var borderStrong: Color {
-        ThemeManager.shared.isDarkMode ? Color.white.opacity(0.3) : Color.black.opacity(0.18)
-    }
+    public static let borderStrong = Color.white.opacity(0.3)
 
     // 发光色（不随主题变化）
     public static let glowPink = Color(hex: "FF3B6B").opacity(0.4)
