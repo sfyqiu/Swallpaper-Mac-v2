@@ -298,8 +298,8 @@ final class CloudLibrarySyncService: ObservableObject {
         var wallpaperRecords: [CloudLibraryRecord] = []
         var mediaRecords: [CloudLibraryRecord] = []
 
-        // 扫描现有下载目录中的文件
-        let wallpaperDir = dpManager.destinationFolder(for: .wallpaper)
+        // 扫描原始本地下载目录（wallpapersFolderURL，不受云盘重定向影响）
+        let wallpaperDir = dpManager.wallpapersFolderURL
         if FileManager.default.fileExists(atPath: wallpaperDir.path) {
             let files = (try? FileManager.default.contentsOfDirectory(at: wallpaperDir, includingPropertiesForKeys: [.fileSizeKey])) ?? []
             for file in files where !file.lastPathComponent.hasPrefix(".") {
@@ -322,7 +322,7 @@ final class CloudLibrarySyncService: ObservableObject {
             }
         }
 
-        let mediaDir = dpManager.destinationFolder(for: .media)
+        let mediaDir = dpManager.mediaFolderURL
         if FileManager.default.fileExists(atPath: mediaDir.path) {
             let files = (try? FileManager.default.contentsOfDirectory(at: mediaDir, includingPropertiesForKeys: [.fileSizeKey])) ?? []
             for file in files where !file.lastPathComponent.hasPrefix(".") {
