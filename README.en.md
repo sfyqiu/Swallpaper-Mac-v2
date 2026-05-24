@@ -211,16 +211,9 @@ App Launch → Check for Updates → Load Latest Rules → Ready to Use
 
 Swallpaper is a **completely free and open-source** personal project. Developing and maintaining a native macOS application requires significant time and effort — from UI design and feature implementation to bug fixes and rule adaptations, every version is built on continuous personal dedication.
 
-If you find Swallpaper helpful, please consider supporting its continued development:
+If you find Swallpaper helpful, **giving a Star ⭐️** is the best way to support development!
 
-<p align="center">
-  <img src="reward.jpg" width="280" alt="WeChat Reward QR Code" />
-  <img src="afdian_reward.jpg" width="280" alt="Afdian Sponsor QR Code" />
-</p>
-
-Of course, **giving a Star ⭐️** is also greatly appreciated!
-
-Every bit of support motivates me to keep maintaining and improving this app. Thank you for using Swallpaper 💜
+Thank you for using Swallpaper 💜
 
 ---
 

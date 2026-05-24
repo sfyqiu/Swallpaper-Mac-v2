@@ -211,20 +211,9 @@ Swallpaper 采用动态规则机制，爬取逻辑与客户端分离：
 
 Swallpaper 是一个**完全免费、开源**的个人项目。开发和维护一个 macOS 原生应用需要投入大量时间和精力——从界面设计到功能实现，从 Bug 修复到规则适配，每一个版本背后都是业余时间的持续投入。
 
-如果你觉得 Swallpaper 对你有帮助，欢迎通过以下方式支持项目的持续发展：
+如果你觉得 Swallpaper 对你有帮助，**给项目点个 Star ⭐️** 是对开发者最大的鼓励！
 
-### 💬 加入 QQ 群
-
-- **Swallpaper 用户交流群**: [点击加入](https://qm.qq.com/q/SRCj8msygq) 👈 971414910
-
-<p align="center">
-  <img src="reward.jpg" width="280" alt="微信赞赏码" />
-  <img src="afdian_reward.jpg" width="280" alt="爱发电赞助码" />
-</p>
-
-当然，**给项目点个 Star ⭐️** 同样是对开发者最大的鼓励！
-
-每一份支持都是我继续维护和迭代这款应用的动力。感谢使用 Swallpaper 💜
+感谢使用 Swallpaper 💜
 
 ---
 
