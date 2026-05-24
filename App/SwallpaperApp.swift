@@ -80,29 +80,30 @@ struct SwallpaperApp {
 
     /// 配置 Kingfisher 高性能图片加载
     private static func configureKingfisher() {
-        // 内存缓存配置 - 降低到 50MB/80张，减少内存占用
-        ImageCache.default.memoryStorage.config.totalCostLimit = 50 * 1024 * 1024 // 50MB
-        ImageCache.default.memoryStorage.config.countLimit = 80
+        // 内存缓存配置
+        ImageCache.default.memoryStorage.config.totalCostLimit = 80 * 1024 * 1024 // 80MB
+        ImageCache.default.memoryStorage.config.countLimit = 120
 
         // 磁盘缓存配置
         ImageCache.default.diskStorage.config.sizeLimit = 500 * 1024 * 1024 // 500MB
         ImageCache.default.diskStorage.config.expiration = .days(7)
 
-        // 下载配置
+        // 下载配置 - 更快的超时，更多并发连接
         let downloader = KingfisherManager.shared.downloader
         let configuration = downloader.sessionConfiguration
-        configuration.httpMaximumConnectionsPerHost = 10
+        configuration.httpMaximumConnectionsPerHost = 15
         configuration.waitsForConnectivity = true
-        configuration.timeoutIntervalForRequest = 60
-        configuration.timeoutIntervalForResource = 180
+        configuration.timeoutIntervalForRequest = 30
+        configuration.timeoutIntervalForResource = 60
         downloader.sessionConfiguration = configuration
-        downloader.downloadTimeout = 60.0
+        downloader.downloadTimeout = 30.0
         KingfisherManager.shared.defaultOptions = [
             .backgroundDecode,
-            .retryStrategy(DelayRetryStrategy(maxRetryCount: 2, retryInterval: .accumulated(1.0))),
+            .scaleFactor(2.0),  // 缩略图降采样，减少内存
+            .retryStrategy(DelayRetryStrategy(maxRetryCount: 1, retryInterval: .accumulated(1.0))),
             .requestModifier(AnyModifier { request in
                 var request = request
-                request.timeoutInterval = max(request.timeoutInterval, 45)
+                request.timeoutInterval = max(request.timeoutInterval, 30)
                 applyImageRequestHeaders(to: &request)
                 return request
             })
