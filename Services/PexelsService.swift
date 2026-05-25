@@ -108,13 +108,19 @@ final class PexelsService: ObservableObject {
 
     /// API 连通性测试
     func testConnection() async -> (success: Bool, message: String) {
-        do {
-            let url = URL(string: "\(baseURL)/v1/curated?per_page=1")!
-            let _: PexelsSearchResponse = try await fetchRaw(url: url)
-            return (true, "Pexels API 连接成功")
-        } catch {
-            return (false, "连接失败: \(error.localizedDescription)")
+        guard let url = URL(string: "\(baseURL)/v1/curated?per_page=1") else {
+            return (false, "Invalid URL")
         }
+        let (success, _, message) = await NetworkService.shared.quickConnect(
+            to: url,
+            method: "GET",
+            headers: ["Authorization": apiKey],
+            timeout: 10
+        )
+        if success {
+            return (true, "Pexels API 连接成功")
+        }
+        return (false, "连接失败: \(message)")
     }
 
     private func fetchRaw<T: Codable>(url: URL) async throws -> T {

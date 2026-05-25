@@ -276,6 +276,74 @@ actor NetworkService {
         }
     }
 
+    // MARK: - 快速连通性检测（不等待网络恢复，适合 API 测试和启动源选择）
+
+    /// 快速检测 URL 是否可达
+    /// 使用独立的临时 URLSession，不设置 waitsForConnectivity，支持代理配置
+    /// - Parameters:
+    ///   - url: 目标 URL
+    ///   - method: HTTP 方法（默认 HEAD）
+    ///   - headers: 请求头
+    ///   - timeout: 超时秒数
+    /// - Returns: (success, statusCode, errorMessage)
+    func quickConnect(
+        to url: URL,
+        method: String = "HEAD",
+        headers: [String: String] = [:],
+        timeout: TimeInterval = 8
+    ) async -> (success: Bool, statusCode: Int, message: String) {
+        // 从当前 session 配置中提取代理设置
+        let currentConfig = self.getCurrentSessionConfig()
+
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = timeout
+        config.timeoutIntervalForResource = timeout + 5
+        config.waitsForConnectivity = false
+
+        // 如果当前 session 有代理配置，继承它
+        if let proxyDict = currentConfig.connectionProxyDictionary {
+            config.connectionProxyDictionary = proxyDict
+        }
+
+        let quickSession = URLSession(configuration: config)
+        defer { quickSession.invalidate() }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.timeoutInterval = timeout
+        for (key, value) in headers {
+            request.setValue(value, forHTTPHeaderField: key)
+        }
+
+        do {
+            let (_, response) = try await quickSession.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse else {
+                return (false, 0, "无效响应")
+            }
+            let ok = (200...299).contains(httpResponse.statusCode)
+            return (ok, httpResponse.statusCode, ok ? "OK" : "HTTP \(httpResponse.statusCode)")
+        } catch let error as URLError where error.code == .timedOut {
+            return (false, 0, "连接超时")
+        } catch let error as URLError {
+            return (false, 0, "网络错误: \(error.code.rawValue)")
+        } catch {
+            return (false, 0, error.localizedDescription)
+        }
+    }
+
+    /// 获取当前 URLSession 的配置（用于提取代理设置）
+    private func getCurrentSessionConfig() -> URLSessionConfiguration {
+        // 由于 URLSession 的 configuration 是只读副本，
+        // 我们重新构建一份与当前 session 一致的配置
+        let config = URLSessionConfiguration.default
+        config.requestCachePolicy = session.configuration.requestCachePolicy
+        config.timeoutIntervalForRequest = session.configuration.timeoutIntervalForRequest
+        config.timeoutIntervalForResource = session.configuration.timeoutIntervalForResource
+        config.connectionProxyDictionary = session.configuration.connectionProxyDictionary
+        config.waitsForConnectivity = session.configuration.waitsForConnectivity
+        return config
+    }
+
     // MARK: - 缓存管理
 
     /// 清除所有缓存

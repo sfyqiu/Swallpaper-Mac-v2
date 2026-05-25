@@ -74,13 +74,19 @@ final class UnsplashService: ObservableObject {
 
     // MARK: - API 连通性测试
     func testConnection() async -> (success: Bool, message: String) {
-        do {
-            let url = URL(string: "\(baseURL)/photos?per_page=1")!
-            let _: [UnsplashPhoto] = try await fetchRaw(url: url)
-            return (true, "Unsplash API 连接成功")
-        } catch {
-            return (false, "连接失败: \(error.localizedDescription)")
+        guard let url = URL(string: "\(baseURL)/photos?per_page=1") else {
+            return (false, "Invalid URL")
         }
+        let (success, _, message) = await NetworkService.shared.quickConnect(
+            to: url,
+            method: "GET",
+            headers: ["Authorization": "Client-ID \(accessKey)", "Accept-Version": "v1"],
+            timeout: 10
+        )
+        if success {
+            return (true, "Unsplash API 连接成功")
+        }
+        return (false, "连接失败: \(message)")
     }
 
     private func fetchRaw<T: Codable>(url: URL) async throws -> T {

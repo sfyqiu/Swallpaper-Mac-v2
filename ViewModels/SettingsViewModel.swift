@@ -67,39 +67,26 @@ class SettingsViewModel: ObservableObject {
         ]
     }
 
-    /// 测试 Wallhaven API 连通性（仅 HEAD/轻量请求，不消耗大量配额）
+    /// 测试 Wallhaven API 连通性（通过 NetworkService.quickConnect，支持代理和短超时）
     private func testWallhavenConnection() async -> (success: Bool, message: String) {
         guard let url = WallhavenAPI.url(for: .search(WallhavenAPI.SearchParameters(perPage: 1))) else {
             return (false, "Invalid URL")
         }
         let headers = WallhavenAPI.authenticationHeaders(apiKey: apiKey)
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "HEAD"
-        request.timeoutInterval = 8
-        for (key, value) in headers {
-            request.setValue(value, forHTTPHeaderField: key)
+        let (success, statusCode, message) = await NetworkService.shared.quickConnect(
+            to: url,
+            headers: headers,
+            timeout: 8
+        )
+        if success {
+            return (true, message)
         }
-
-        do {
-            let (_, response) = try await URLSession.shared.data(for: request)
-            if let httpResponse = response as? HTTPURLResponse {
-                if httpResponse.statusCode == 200 || httpResponse.statusCode == 204 {
-                    return (true, "OK (\(httpResponse.statusCode))")
-                } else if httpResponse.statusCode == 401 {
-                    return (false, "API Key 无效 (401)")
-                } else if httpResponse.statusCode == 429 {
-                    return (false, "请求过于频繁 (429)")
-                } else {
-                    return (false, "HTTP \(httpResponse.statusCode)")
-                }
-            }
-            return (false, "Invalid response")
-        } catch let error as URLError where error.code == .timedOut {
-            return (false, "连接超时")
-        } catch {
-            return (false, error.localizedDescription)
+        if statusCode == 401 {
+            return (false, "API Key 无效 (401)")
+        } else if statusCode == 429 {
+            return (false, "请求过于频繁 (429)")
         }
+        return (false, message)
     }
 
     @Published var proxyEnabled = false { didSet { UserDefaults.standard.set(proxyEnabled, forKey: "proxy_enabled"); syncProxySettings() } }

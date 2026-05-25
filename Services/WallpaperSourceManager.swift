@@ -394,18 +394,35 @@ class WallpaperSourceManager: ObservableObject {
         print("[WallpaperSourceManager] VPN (utun/ppp/…) detected: \(vpnEnabled)")
 
         if vpnEnabled {
-            // 启用了 VPN，保持 Wallhaven
-            print("[WallpaperSourceManager] VPN is enabled, keeping Wallhaven")
-            await MainActor.run {
-                if activeSource != .wallhaven {
-                    activeSource = .wallhaven
-                    isAutoSwitched = false
+            // 启用了 VPN，还需验证 Wallhaven 实际可达（有些 VPN 只代理浏览器流量）
+            let wallhavenReachable = await quickCheckWallhaven(timeout: 8)
+            print("[WallpaperSourceManager] VPN is enabled, Wallhaven reachable: \(wallhavenReachable)")
+
+            if wallhavenReachable {
+                await MainActor.run {
+                    if activeSource != .wallhaven {
+                        activeSource = .wallhaven
+                        isAutoSwitched = false
+                        consecutiveFailures = 0
+                        consecutiveSuccesses = 0
+                        UserDefaults.standard.set(SourceType.wallhaven.rawValue, forKey: selectedSourceKey)
+                        UserDefaults.standard.set(false, forKey: autoSwitchedKey)
+                    }
+                    isInitialSourceSelectionComplete = true
+                }
+            } else {
+                // VPN 检测到但 Wallhaven 不可达，降级到 4K 源
+                print("[WallpaperSourceManager] VPN detected but Wallhaven unreachable, falling back to 4K")
+                await MainActor.run {
+                    activeSource = .fourKWallpapers
+                    isAutoSwitched = true
                     consecutiveFailures = 0
                     consecutiveSuccesses = 0
-                    UserDefaults.standard.set(SourceType.wallhaven.rawValue, forKey: selectedSourceKey)
-                    UserDefaults.standard.set(false, forKey: autoSwitchedKey)
+                    UserDefaults.standard.set(SourceType.fourKWallpapers.rawValue, forKey: selectedSourceKey)
+                    UserDefaults.standard.set(true, forKey: autoSwitchedKey)
+                    lastSwitchMessage = "⚠️ VPN 已检测到但 Wallhaven 不可达，已切换到 4K 备用源"
+                    isInitialSourceSelectionComplete = true
                 }
-                isInitialSourceSelectionComplete = true
             }
         } else {
             // 未启用 VPN，ping Google 检测
@@ -481,21 +498,21 @@ class WallpaperSourceManager: ObservableObject {
     /// - Returns: true 如果 Google 可达
     func pingGoogle(timeout: TimeInterval = 5) async -> Bool {
         let url = URL(string: "https://www.google.com/generate_204")!
+        let (success, statusCode, _) = await NetworkService.shared.quickConnect(
+            to: url,
+            timeout: timeout
+        )
+        // generate_204 返回 204 或者 200 都是可达
+        return success || statusCode == 204
+    }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "HEAD"
-        request.timeoutInterval = timeout
-
-        do {
-            let (_, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse else {
-                return false
-            }
-            // generate_204 返回 204 或者 200 都是可达
-            return httpResponse.statusCode == 204 || httpResponse.statusCode == 200
-        } catch {
-            print("[WallpaperSourceManager] Google ping failed: \(error.localizedDescription)")
+    /// 快速检测 Wallhaven API 是否可达（不依赖 VPN 检测假设）
+    /// 使用 NetworkService.quickConnect 支持代理且不等待连接
+    private func quickCheckWallhaven(timeout: TimeInterval) async -> Bool {
+        guard let url = WallhavenAPI.url(for: .search(WallhavenAPI.SearchParameters(perPage: 1))) else {
             return false
         }
+        let (success, _, _) = await NetworkService.shared.quickConnect(to: url, timeout: timeout)
+        return success
     }
 }

@@ -102,13 +102,18 @@ final class CoverrService: ObservableObject {
 
     // MARK: - API 连通性测试
     func testConnection() async -> (success: Bool, message: String) {
-        do {
-            let url = URL(string: "\(baseURL)/videos?page_size=1&api_key=\(apiKey)")!
-            let _: CoverrSearchResponse = try await fetchRaw(url: url)
-            return (true, "Coverr API 连接成功")
-        } catch {
-            return (false, "连接失败: \(error.localizedDescription)")
+        guard let url = URL(string: "\(baseURL)/videos?page_size=1&api_key=\(apiKey)") else {
+            return (false, "Invalid URL")
         }
+        let (success, _, message) = await NetworkService.shared.quickConnect(
+            to: url,
+            method: "GET",
+            timeout: 10
+        )
+        if success {
+            return (true, "Coverr API 连接成功")
+        }
+        return (false, "连接失败: \(message)")
     }
 
     private func fetchRaw<T: Codable>(url: URL) async throws -> T {
