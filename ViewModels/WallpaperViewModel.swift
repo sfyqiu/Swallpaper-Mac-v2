@@ -1256,9 +1256,12 @@ class WallpaperViewModel: ObservableObject {
     /// 首页轮播专用刷新：从多个壁纸源并行拉取并混搭，丰富轮播多样性
     func refreshFeaturedForCarousel() async throws -> [Wallpaper] {
         // 并行拉取 Wallhaven（随机时间范围+分页）和 4K Wallpapers
+        // Wallhaven 使用更大的随机范围确保每次拿到不同的图
+        let randomRange = [TopRange.oneDay, .threeDays, .oneWeek, .oneMonth, .threeMonths].randomElement() ?? .oneDay
+        let randomPage = Int.random(in: 1...5)
         async let wallhaven = try? featuredFromMainSource(
-            topRange: [TopRange.oneDay, .threeDays, .oneWeek, .oneMonth].randomElement() ?? .oneDay,
-            page: Int.random(in: 1...3)
+            topRange: randomRange,
+            page: randomPage
         )
         async let fourK = try? FourKWallpapersService.shared.fetchFeatured(limit: 8)
 
@@ -1274,7 +1277,8 @@ class WallpaperViewModel: ObservableObject {
     }
 
     private func featuredFromMainSource(topRange: TopRange = .oneDay, page: Int = 1) async throws -> [Wallpaper] {
-        // 按 3 个分类分别请求，交织混合，确保轮播图覆盖不同风格
+        // 按 3 个分类分别请求，交织混合
+        // 直接调用 Wallhaven API，绕过 fetchWallpapers(parameters:) 的源调度
         func makeParams(categories: String) -> WallhavenAPI.SearchParameters {
             WallhavenAPI.SearchParameters(
                 page: page,
@@ -1287,9 +1291,9 @@ class WallpaperViewModel: ObservableObject {
             )
         }
 
-        async let general = fetchWallpapers(parameters: makeParams(categories: "100"))
-        async let anime = fetchWallpapers(parameters: makeParams(categories: "010"))
-        async let people = fetchWallpapers(parameters: makeParams(categories: "001"))
+        async let general = fetchFromWallhaven(parameters: makeParams(categories: "100"))
+        async let anime = fetchFromWallhaven(parameters: makeParams(categories: "010"))
+        async let people = fetchFromWallhaven(parameters: makeParams(categories: "001"))
 
         let (g, a, p) = try await (general, anime, people)
         var mixed: [Wallpaper] = []
