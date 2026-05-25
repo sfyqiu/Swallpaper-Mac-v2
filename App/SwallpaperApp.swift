@@ -386,8 +386,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     @MainActor func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        // 当用户点击 Dock 图标时显示主窗口
-        showMainWindow()
+        // 当用户点击 Dock 图标时，如果没有可见窗口才显示主窗口
+        // 如果有可见窗口（如设置窗口），让 macOS 自行处理窗口排序
+        // 避免 showMainWindow() 强制把主窗口置前而覆盖了设置窗口
+        if !flag {
+            showMainWindow()
+        }
         return true
     }
 
