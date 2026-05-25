@@ -306,7 +306,7 @@ actor NetworkService {
         }
 
         let quickSession = URLSession(configuration: config)
-        defer { quickSession.invalidate() }
+        defer { quickSession.invalidateAndCancel() }
 
         var request = URLRequest(url: url)
         request.httpMethod = method
