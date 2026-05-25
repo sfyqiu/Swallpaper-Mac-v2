@@ -594,14 +594,35 @@ struct HomeContentView: View {
         }
     }
 
-    /// 刷新/随机轮播：打乱顺序、清除不感兴趣、重置到第一张
+    /// 刷新/随机轮播：从 API 拉取新壁纸替换当前轮播内容
     private func shuffleCarousel() {
         dismissedHeroIDs.removeAll()
-        viewModel.featuredWallpapers.shuffle()
-        heroMediaItems.shuffle()
         stopCarouselAutoPlay()
-        syncCarouselState(with: heroItems)
-        startCarouselAutoPlay()
+
+        Task {
+            do {
+                // 拉取新壁纸并过滤 SFW
+                let newWallpapers = try await viewModel.refreshFeaturedForCarousel()
+                let sfw = newWallpapers.filter { $0.purity.lowercased() == "sfw" }
+                await MainActor.run {
+                    viewModel.featuredWallpapers = Array(sfw.prefix(24))
+                }
+                // 也刷新 MotionBG 媒体数据
+                await refreshHeroMediaItems()
+                await MainActor.run {
+                    syncCarouselState(with: heroItems)
+                    startCarouselAutoPlay()
+                }
+            } catch {
+                // 网络失败时回退：原地打乱已有数据
+                await MainActor.run {
+                    viewModel.featuredWallpapers.shuffle()
+                    heroMediaItems.shuffle()
+                    syncCarouselState(with: heroItems)
+                    startCarouselAutoPlay()
+                }
+            }
+        }
     }
 
     /// 随机打乱底部壁纸和视频栏目的展示顺序

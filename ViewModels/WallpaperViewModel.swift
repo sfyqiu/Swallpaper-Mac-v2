@@ -1253,16 +1253,30 @@ class WallpaperViewModel: ObservableObject {
         }
     }
 
-    private func featuredFromMainSource() async throws -> [Wallpaper] {
+    /// 首页轮播专用刷新：换一批新壁纸（不同时间范围 + 随机分页）
+    func refreshFeaturedForCarousel() async throws -> [Wallpaper] {
+        let sourceManager = WallpaperSourceManager.shared
+        switch sourceManager.activeSource {
+        case .wallhaven:
+            let ranges: [TopRange] = [.oneDay, .threeDays, .oneWeek, .oneMonth]
+            let range = ranges.randomElement() ?? .oneDay
+            let page = Int.random(in: 1...3)
+            return try await featuredFromMainSource(topRange: range, page: page)
+        default:
+            return try await fetchFeaturedWallpapers()
+        }
+    }
+
+    private func featuredFromMainSource(topRange: TopRange = .oneDay, page: Int = 1) async throws -> [Wallpaper] {
         // 按 3 个分类分别请求，交织混合，确保轮播图覆盖不同风格
         func makeParams(categories: String) -> WallhavenAPI.SearchParameters {
             WallhavenAPI.SearchParameters(
-                page: 1,
+                page: page,
                 categories: categories,
                 purity: "100",
                 sorting: SortingOption.toplist.rawValue,
                 order: "desc",
-                topRange: TopRange.oneDay.rawValue,
+                topRange: topRange.rawValue,
                 ratios: ["16x9", "16x10", "21x9", "32x9", "48x9"]
             )
         }
