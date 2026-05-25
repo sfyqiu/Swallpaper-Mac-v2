@@ -1253,18 +1253,24 @@ class WallpaperViewModel: ObservableObject {
         }
     }
 
-    /// 首页轮播专用刷新：换一批新壁纸（不同时间范围 + 随机分页）
+    /// 首页轮播专用刷新：从多个壁纸源并行拉取并混搭，丰富轮播多样性
     func refreshFeaturedForCarousel() async throws -> [Wallpaper] {
-        let sourceManager = WallpaperSourceManager.shared
-        switch sourceManager.activeSource {
-        case .wallhaven:
-            let ranges: [TopRange] = [.oneDay, .threeDays, .oneWeek, .oneMonth]
-            let range = ranges.randomElement() ?? .oneDay
-            let page = Int.random(in: 1...3)
-            return try await featuredFromMainSource(topRange: range, page: page)
-        default:
+        // 并行拉取 Wallhaven（随机时间范围+分页）和 4K Wallpapers
+        async let wallhaven = try? featuredFromMainSource(
+            topRange: [TopRange.oneDay, .threeDays, .oneWeek, .oneMonth].randomElement() ?? .oneDay,
+            page: Int.random(in: 1...3)
+        )
+        async let fourK = try? FourKWallpapersService.shared.fetchFeatured(limit: 8)
+
+        var results: [Wallpaper] = []
+        if let w = await wallhaven { results.append(contentsOf: w.shuffled()) }
+        if let f = await fourK { results.append(contentsOf: f.shuffled()) }
+
+        if results.isEmpty {
+            // 全部失败时回退到当前活跃源
             return try await fetchFeaturedWallpapers()
         }
+        return results.shuffled()
     }
 
     private func featuredFromMainSource(topRange: TopRange = .oneDay, page: Int = 1) async throws -> [Wallpaper] {
