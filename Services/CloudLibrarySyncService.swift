@@ -722,7 +722,7 @@ extension CloudLibrarySyncService {
             authorName: nil,
             authorSteamID: nil,
             authorAvatarURL: nil,
-            fileSize: (record.fileSize ?? fileSize).flatMap(Int.init),
+            fileSize: record.fileSize ?? fileSize,
             createdAt: record.createdAt,
             updatedAt: record.updatedAt
         )
