@@ -77,6 +77,7 @@
 | 🔍 **Smart Search & Filter** | ✅ | Keywords, tags, categories, color, resolution — find exactly what you want |
 | ⭐ **Collections** | ✅ | Save favorite wallpapers and videos to build your personal ACG library |
 | ⚡️ **One-click Apply** | ✅ | Set as desktop wallpaper or dynamic desktop directly while browsing |
+| 🖱️ **Detail View Navigation** | ✅ | In wallpaper detail view, scroll up/down or press ↑ ↓ arrow keys to quickly switch between wallpapers |
 | 🖥️ **Multi-display Support** | ✅ | Set different wallpapers for each display — perfect for multi-monitor setups |
 | 📥 **Local Data Import** | ✅ | Import local wallpaper folders for unified management of personal collections |
 | 🧪 **API Connectivity Test** | ✅ | One-click parallel test of all API sources to quickly diagnose network issues |
@@ -137,6 +138,7 @@ Swallpaper supports syncing your wallpaper and video library to major cloud driv
 - **Auto Sync** — Downloads automatically go to cloud directory; all devices have instant access
 - **Manual Sync** — Download locally, trigger migration manually — ideal for limited bandwidth
 - **Batch Migration** — One-click migration of entire existing library to cloud
+- **New Device Import** — Sign in to the same cloud drive on a new Mac, import all wallpapers and videos to local library with one click
 - **Atomic Switching** — Switch cloud providers without disable/enable gaps; download paths stay uninterrupted
 - **Error Alerts** — Active alert dialogs when cloud drive is unavailable, instead of silent failures
 
