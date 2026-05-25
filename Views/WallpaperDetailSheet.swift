@@ -128,37 +128,58 @@ struct WallpaperDetailSheet: View {
                 }
                 .allowsHitTesting(false)
 
-                ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: 0) {
-                        // 为固定主信息区留出首屏空间，避免卡片顶到标题下方
-                        Color.clear
-                            .frame(height: detailScrollTopInset(viewportHeight: viewH, heroHidden: isHeroContentHidden))
-
-                        Color.clear
-                            .frame(height: 1)
-                            .padding(.horizontal, horizontalPadding)
-                            .padding(.bottom, bottomSafeInset + 88)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .top)
-                    .background(
-                        GeometryReader { proxy in
+                // 用 ScrollViewReader 支持程序化滚动复位（滚动翻页后回到顶部）
+                ScrollViewReader { scrollProxy in
+                    ScrollView(.vertical, showsIndicators: false) {
+                        VStack(spacing: 0) {
+                            // 为固定主信息区留出首屏空间，避免卡片顶到标题下方
                             Color.clear
-                                .preference(key: ScrollOffsetPreferenceKey.self, value: proxy.frame(in: .named("scroll")).minY)
+                                .frame(height: detailScrollTopInset(viewportHeight: viewH, heroHidden: isHeroContentHidden))
+                                .id("scroll-top")
+
+                            Color.clear
+                                .frame(height: 1)
+                                .padding(.horizontal, horizontalPadding)
+                                .padding(.bottom, bottomSafeInset + 88)
                         }
-                    )
-                }
-                .scrollClipDisabled()
-                .safeAreaPadding(.bottom, bottomSafeInset)
-                .background(Color.clear)
-                .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
-                    scrollOffset = value
-                }
-                // 叠在滚动容器上但不铺满全屏，避免挡掉下方列表的滚动与点击
-                .overlay(alignment: .top) {
-                    fixedHeroChrome(
-                        viewportWidth: viewW,
-                        topBarTopInset: topBarTopInset
-                    )
+                        .frame(maxWidth: .infinity, alignment: .top)
+                        .background(
+                            GeometryReader { proxy in
+                                Color.clear
+                                    .preference(key: ScrollOffsetPreferenceKey.self, value: proxy.frame(in: .named("scroll")).minY)
+                            }
+                        )
+                    }
+                    .scrollClipDisabled()
+                    .safeAreaPadding(.bottom, bottomSafeInset)
+                    .background(Color.clear)
+                    .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
+                        scrollOffset = value
+                    }
+                    // 叠在滚动容器上但不铺满全屏，避免挡掉下方列表的滚动与点击
+                    .overlay(alignment: .top) {
+                        fixedHeroChrome(
+                            viewportWidth: viewW,
+                            topBarTopInset: topBarTopInset
+                        )
+                    }
+                    // 滚动翻页：向下滚动超过阈值触发下一张，向上滚动超过阈值触发上一张
+                    .onChange(of: scrollOffset) { _, newValue in
+                        guard !isNavigating else { return }
+                        let threshold: CGFloat = 50
+                        if newValue < -threshold {
+                            navigateToNextWallpaper()
+                            // 导航完成后复位滚动位置，避免连续触发
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                scrollProxy.scrollTo("scroll-top", anchor: .top)
+                            }
+                        } else if newValue > threshold {
+                            navigateToPreviousWallpaper()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                scrollProxy.scrollTo("scroll-top", anchor: .top)
+                            }
+                        }
+                    }
                 }
 
                 if showInfoBubble {
