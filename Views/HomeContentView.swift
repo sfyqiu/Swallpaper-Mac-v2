@@ -474,7 +474,8 @@ struct HomeContentView: View {
                 atmosphereSecondary: atmosphereController.secondary,
                 onSelect: { _ in
                     onNavigateToWallpaperExplore?()
-                }
+                },
+                onNavigate: { onNavigateToWallpaperExplore?() }
             )
 
             // 热门动态壁纸（使用独立的首页数据，不跟随 Explore 列表变化）
@@ -485,7 +486,8 @@ struct HomeContentView: View {
                 atmosphereSecondary: atmosphereController.secondary,
                 onSelect: { _ in
                     onNavigateToMediaExplore?()
-                }
+                },
+                onNavigate: { onNavigateToMediaExplore?() }
             )
         }
         .padding(.top, 18)
@@ -628,10 +630,13 @@ struct HomeContentView: View {
     /// 随机打乱底部壁纸和视频栏目的展示顺序
     private func reshuffleShelves() {
         let latest = Array(viewModel.latestWallpapers.prefix(10))
+            .filter { $0.purity.lowercased() == "sfw" }
         if !latest.isEmpty {
             shuffledRecentWallpapers = latest.shuffled()
         } else {
-            shuffledRecentWallpapers = Array(viewModel.wallpapers.suffix(10)).shuffled()
+            shuffledRecentWallpapers = Array(viewModel.wallpapers.suffix(10))
+                .filter { $0.purity.lowercased() == "sfw" }
+                .shuffled()
         }
         shuffledMediaItems = mediaViewModel.homeItems.shuffled()
     }
@@ -1291,25 +1296,29 @@ private struct HomeShelfSection: View {
     let atmospherePrimary: Color
     let atmosphereSecondary: Color
     let onSelect: (Wallpaper) -> Void
+    var onNavigate: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            HStack(spacing: 10) {
-                Text(title)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundStyle(.white)
+            Button(action: { onNavigate?() }) {
+                HStack(spacing: 10) {
+                    Text(title)
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(.white)
 
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(.white.opacity(0.54))
-                    .frame(width: 22, height: 22)
-                    .background(
-                        Circle()
-                            .fill(Color.white.opacity(0.06))
-                    )
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(.white.opacity(0.54))
+                        .frame(width: 22, height: 22)
+                        .background(
+                            Circle()
+                                .fill(Color.white.opacity(0.06))
+                        )
 
-                Spacer()
+                    Spacer()
+                }
             }
+            .buttonStyle(.plain)
 
             if wallpapers.isEmpty {
                 HorizontalScrollSkeleton(
@@ -1593,25 +1602,29 @@ private struct HomeMediaSection: View {
     let atmospherePrimary: Color
     let atmosphereSecondary: Color
     let onSelect: (MediaItem) -> Void
+    var onNavigate: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            HStack(spacing: 10) {
-                Text(title)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundStyle(.white)
+            Button(action: { onNavigate?() }) {
+                HStack(spacing: 10) {
+                    Text(title)
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(.white)
 
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(.white.opacity(0.54))
-                    .frame(width: 22, height: 22)
-                    .background(
-                        Circle()
-                            .fill(Color.white.opacity(0.06))
-                    )
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(.white.opacity(0.54))
+                        .frame(width: 22, height: 22)
+                        .background(
+                            Circle()
+                                .fill(Color.white.opacity(0.06))
+                        )
 
-                Spacer()
+                    Spacer()
+                }
             }
+            .buttonStyle(.plain)
 
             if mediaItems.isEmpty {
                 HorizontalScrollSkeleton(
