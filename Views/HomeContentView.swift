@@ -137,6 +137,9 @@ struct HomeContentView: View {
     // 轮播专用 MotionBG 数据（独立于 explore 列表）
     @State private var heroMediaItems: [MediaItem] = []
 
+    // 用户不感兴趣的轮播项（会话级，不持久化）
+    @State private var dismissedHeroIDs: Set<String> = []
+
     // 更高更沉浸的轮播图，接近参考图比例
     private func heroHeight(for width: CGFloat) -> CGFloat {
         guard width > 0, width.isFinite, !width.isNaN, !width.isInfinite else { return 460 }
@@ -198,13 +201,45 @@ struct HomeContentView: View {
                     VStack {
                         Spacer()
                         if heroItems.count > 1 {
-                            HeroPaginationDots(
-                                count: heroItems.count,
-                                currentIndex: currentCarouselIndex,
-                                onSelect: { index in
-                                    selectHero(at: index)
+                            HStack(spacing: 12) {
+                                HeroPaginationDots(
+                                    count: heroItems.count,
+                                    currentIndex: currentCarouselIndex,
+                                    onSelect: { index in
+                                        selectHero(at: index)
+                                    }
+                                )
+
+                                Button(action: shuffleCarousel) {
+                                    Image(systemName: "arrow.clockwise")
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .foregroundStyle(.white.opacity(0.72))
+                                        .frame(width: 26, height: 26)
+                                        .background(
+                                            Circle()
+                                                .fill(.white.opacity(0.12))
+                                        )
                                 }
-                            )
+                                .buttonStyle(.plain)
+                            }
+                            .padding(.bottom, heroContentOverlap + 16)
+                        } else if !dismissedHeroIDs.isEmpty {
+                            Button(action: shuffleCarousel) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "arrow.clockwise")
+                                        .font(.system(size: 12, weight: .semibold))
+                                    Text("重新发现")
+                                        .font(.system(size: 12, weight: .semibold))
+                                }
+                                .foregroundStyle(.white.opacity(0.82))
+                                .padding(.horizontal, 14)
+                                .frame(height: 30)
+                                .background(
+                                    Capsule()
+                                        .fill(.white.opacity(0.12))
+                                )
+                            }
+                            .buttonStyle(.plain)
                             .padding(.bottom, heroContentOverlap + 16)
                         }
                     }
@@ -353,9 +388,11 @@ struct HomeContentView: View {
                 )
             } else {
                 heroCarousel(width: width, height: height, items: items)
+                    .transition(.opacity)
             }
         }
         .frame(width: width, height: height)
+        .animation(.easeInOut(duration: 0.6), value: heroItems.isEmpty)
         .mask(
             LinearGradient(
                 stops: [
@@ -395,7 +432,8 @@ struct HomeContentView: View {
                         item: item,
                         isCurrent: item.id == currentHeroID && isTabActive,
                         width: width,
-                        height: height
+                        height: height,
+                        onDismiss: { id in dismissedHeroIDs.insert(id) }
                     )
                     .frame(width: width, height: height)
                 }
@@ -452,8 +490,11 @@ struct HomeContentView: View {
     }
 
     private var heroItems: [HeroItem] {
-        let wallpapers = viewModel.featuredWallpapers.filter { $0.dimensionX > $0.dimensionY }
+        let wallpapers = viewModel.featuredWallpapers
+            .filter { $0.dimensionX > $0.dimensionY }
+            .filter { !dismissedHeroIDs.contains("w-\($0.id)") }
         let mediaItems = heroMediaItems
+            .filter { !dismissedHeroIDs.contains("m-\($0.id)") }
 
         var result: [HeroItem] = []
         let maxCount = max(wallpapers.count, mediaItems.count)
@@ -541,6 +582,16 @@ struct HomeContentView: View {
         } catch {
             AppLogger.error(.general, "Failed to fetch hero media items: \(error.localizedDescription)")
         }
+    }
+
+    /// 刷新/随机轮播：打乱顺序、清除不感兴趣、重置到第一张
+    private func shuffleCarousel() {
+        dismissedHeroIDs.removeAll()
+        viewModel.featuredWallpapers.shuffle()
+        heroMediaItems.shuffle()
+        stopCarouselAutoPlay()
+        syncCarouselState(with: heroItems)
+        startCarouselAutoPlay()
     }
 
     private func syncCarouselState(with items: [HeroItem]) {
@@ -811,6 +862,9 @@ private struct HeroSlide: View {
     let isCurrent: Bool
     let width: CGFloat
     let height: CGFloat
+    var onDismiss: ((String) -> Void)?
+
+    @State private var isDismissButtonVisible = false
 
     private var palette: HeroDrivenPalette {
         switch item {
@@ -843,6 +897,38 @@ private struct HeroSlide: View {
                     onReady: nil
                 )
                 .frame(width: width, height: height)
+            }
+
+            // 不感兴趣按钮（右上角，hover 显示）
+            if let onDismiss {
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button(action: { onDismiss(item.id) }) {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundStyle(.white.opacity(0.85))
+                                .frame(width: 28, height: 28)
+                                .background(
+                                    Circle()
+                                        .fill(.black.opacity(0.35))
+                                )
+                                .overlay(
+                                    Circle()
+                                        .stroke(.white.opacity(0.12), lineWidth: 0.5)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                        .opacity(isDismissButtonVisible ? 1 : 0)
+                        .padding(12)
+                    }
+                    Spacer()
+                }
+            }
+        }
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isDismissButtonVisible = hovering
             }
         }
     }

@@ -1254,18 +1254,32 @@ class WallpaperViewModel: ObservableObject {
     }
 
     private func featuredFromMainSource() async throws -> [Wallpaper] {
-        let response = try await fetchWallpapers(
-            parameters: WallhavenAPI.SearchParameters(
+        // 按 3 个分类分别请求，交织混合，确保轮播图覆盖不同风格
+        func makeParams(categories: String) -> WallhavenAPI.SearchParameters {
+            WallhavenAPI.SearchParameters(
                 page: 1,
-                categories: "111",
+                categories: categories,
                 purity: "100",
                 sorting: SortingOption.toplist.rawValue,
                 order: "desc",
                 topRange: TopRange.oneDay.rawValue,
                 ratios: ["16x9", "16x10", "21x9", "32x9", "48x9"]
             )
-        )
-        return response.data
+        }
+
+        async let general = fetchWallpapers(parameters: makeParams(categories: "100"))
+        async let anime = fetchWallpapers(parameters: makeParams(categories: "010"))
+        async let people = fetchWallpapers(parameters: makeParams(categories: "001"))
+
+        let (g, a, p) = try await (general, anime, people)
+        var mixed: [Wallpaper] = []
+        let maxCount = max(g.data.count, a.data.count, p.data.count)
+        for i in 0..<maxCount {
+            if i < g.data.count { mixed.append(g.data[i]) }
+            if i < a.data.count { mixed.append(a.data[i]) }
+            if i < p.data.count { mixed.append(p.data[i]) }
+        }
+        return mixed
     }
 
     // MARK: - 获取 Top 列表
