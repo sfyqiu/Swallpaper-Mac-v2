@@ -355,6 +355,17 @@ private var languageBinding: Binding<LocalizationService.Language> {
                 }
             }
 
+            // NSFW 设置
+            MacSettingsSection(header: "NSFW") {
+                MacSettingsRow(
+                    title: "NSFW",
+                    subtitle: "开启后可在壁纸和视频界面浏览成人内容，关闭后隐藏所有成人内容",
+                    showDivider: false
+                ) {
+                    MacToggle(isOn: $viewModel.nsfwEnabled)
+                }
+            }
+
             // GitHub Token
             MacSettingsSection {
                 MacSettingsRow(title: "GitHub Token", subtitle: "提高更新检查 API 限额至 5000次/小时", showDivider: false) {

@@ -574,33 +574,7 @@ struct MediaExploreContentView: View {
 
     @ViewBuilder
     private var filterSection: some View {
-        if workshopSourceManager.activeSource == .wallpaperEngine {
-            VStack(alignment: .leading, spacing: 10) {
-                Text(t("contentLevel"))
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(arcSettings.secondaryText.opacity(0.46))
-                FlowLayout(spacing: 10) {
-                    ForEach(visibleWorkshopContentLevels) { level in
-                        FilterChip(
-                            title: level.title,
-                            subtitle: level.subtitle,
-                            isSelected: selectedWorkshopContentLevel?.id == level.id,
-                            tint: level.tint
-                        ) {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                if selectedWorkshopContentLevel?.id == level.id {
-                                    // 点击已选中项：回到默认 Everyone（不允许空选）
-                                    selectedWorkshopContentLevel = .everyone
-                                } else {
-                                    selectedWorkshopContentLevel = level
-                                }
-                                Task { await applyWorkshopFilters() }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        EmptyView()
     }
 
     private var workshopResolutionMenu: some View {
@@ -715,14 +689,6 @@ struct MediaExploreContentView: View {
                 title: tag.displayName,
                 accentHex: tag.accentColors.first ?? "FFFFFF",
                 kind: .tag
-            ))
-        }
-        if let level = selectedWorkshopContentLevel, level != .everyone {
-            chips.append(WorkshopFilterChipData(
-                id: "level_\(level.id)",
-                title: level.title,
-                accentHex: level.accentHex,
-                kind: .level
             ))
         }
         if let res = selectedWorkshopResolution {
