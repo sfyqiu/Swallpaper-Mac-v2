@@ -516,11 +516,13 @@ struct WallpaperExploreContentView: View {
         }
         .padding(.vertical, 2)
 
-        // 纯按钮（SFW/Sketchy/NSFW）— 小标签样式，放在分类标签末尾
+        // 纯度按钮（SFW/Sketchy/NSFW）— 小标签样式，横排放置在分类标签末尾
         if viewModel.currentSourceSupportsNSFW {
-            TagChip(title: "SFW", isSelected: viewModel.puritySFW) { togglePurity(.sfw) }
-            TagChip(title: "Sketchy", isSelected: viewModel.puritySketchy) { togglePurity(.sketchy) }
-            TagChip(title: "NSFW", isSelected: viewModel.purityNSFW) { togglePurity(.nsfw) }
+            FlowLayout(spacing: 12) {
+                TagChip(title: "SFW", isSelected: viewModel.puritySFW) { togglePurity(.sfw) }
+                TagChip(title: "Sketchy", isSelected: viewModel.puritySketchy) { togglePurity(.sketchy) }
+                TagChip(title: "NSFW", isSelected: viewModel.purityNSFW) { togglePurity(.nsfw) }
+            }
         }
     }
 
