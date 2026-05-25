@@ -492,6 +492,7 @@ struct HomeContentView: View {
     private var heroItems: [HeroItem] {
         let wallpapers = viewModel.featuredWallpapers
             .filter { $0.dimensionX > $0.dimensionY }
+            .filter { $0.purity.lowercased() == "sfw" }
             .filter { !dismissedHeroIDs.contains("w-\($0.id)") }
         let mediaItems = heroMediaItems
             .filter { !dismissedHeroIDs.contains("m-\($0.id)") }
