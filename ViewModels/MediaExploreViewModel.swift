@@ -639,7 +639,7 @@ final class MediaExploreViewModel: ObservableObject {
                     pageSize: 10,
                     tags: workshopCurrentTags,
                     type: wallpaperType,
-                    contentLevel: UserDefaults.standard.bool(forKey: "nsfw_enabled") ? nil : workshopCurrentContentLevel?.rawValue
+                    contentLevel: workshopCurrentContentLevel?.rawValue
                 )
                 let response = try await workshopService.search(params: params)
                 homeItems = workshopService.convertToMediaItems(response.items)
@@ -1485,12 +1485,7 @@ final class MediaExploreViewModel: ObservableObject {
             }
         }()
 
-        let resolvedContentLevel: WorkshopSourceManager.WorkshopContentLevel?
-        if UserDefaults.standard.bool(forKey: "nsfw_enabled") {
-            resolvedContentLevel = nil
-        } else {
-            resolvedContentLevel = contentLevel ?? workshopCurrentContentLevel
-        }
+        let resolvedContentLevel = contentLevel ?? workshopCurrentContentLevel
         let resolvedResolution = resolution ?? workshopCurrentResolution
 
         let params = WorkshopSearchParams(

@@ -542,6 +542,25 @@ struct MediaExploreContentView: View {
                 }
                 workshopResolutionMenu
             }
+
+            // 内容级别按钮（Everyone/Sketchy/NSFW）— 小标签样式，放在分类标签末尾
+            FlowLayout(spacing: 12) {
+                ForEach(visibleWorkshopContentLevels) { level in
+                    TagChip(
+                        title: level.title,
+                        isSelected: selectedWorkshopContentLevel?.id == level.id
+                    ) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                            if selectedWorkshopContentLevel?.id == level.id {
+                                selectedWorkshopContentLevel = .everyone
+                            } else {
+                                selectedWorkshopContentLevel = level
+                            }
+                            Task { await applyWorkshopFilters() }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -689,6 +708,14 @@ struct MediaExploreContentView: View {
                 title: tag.displayName,
                 accentHex: tag.accentColors.first ?? "FFFFFF",
                 kind: .tag
+            ))
+        }
+        if let level = selectedWorkshopContentLevel, level != .everyone {
+            chips.append(WorkshopFilterChipData(
+                id: "level_\(level.id)",
+                title: level.title,
+                accentHex: level.accentHex,
+                kind: .level
             ))
         }
         if let res = selectedWorkshopResolution {

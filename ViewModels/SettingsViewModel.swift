@@ -36,7 +36,6 @@ class SettingsViewModel: ObservableObject {
     @Published var pauseOnBatteryPower = false { didSet { UserDefaults.standard.set(pauseOnBatteryPower, forKey: "pause_on_battery_power") } }
     @Published var hdrEnabled = true { didSet { UserDefaults.standard.set(hdrEnabled, forKey: "hdr_enabled") } }
     @Published var showAllWorkshopContent = true { didSet { UserDefaults.standard.set(showAllWorkshopContent, forKey: "show_all_workshop_content") } }
-    @Published var nsfwEnabled = false { didSet { UserDefaults.standard.set(nsfwEnabled, forKey: "nsfw_enabled") } }
     @Published var githubToken: String = "" { didSet { UserDefaults.standard.set(githubToken, forKey: "github_token") } }
     @Published var unsplashAccessKey: String = "" { didSet { UserDefaults.standard.set(unsplashAccessKey, forKey: "unsplash_access_key") } }
     @Published var pexelsApiKey: String = "" { didSet { UserDefaults.standard.set(pexelsApiKey, forKey: "pexels_api_key") } }
@@ -249,7 +248,6 @@ class SettingsViewModel: ObservableObject {
         pauseOnBatteryPower = defaults.bool(forKey: "pause_on_battery_power")
         hdrEnabled = defaults.object(forKey: "hdr_enabled") as? Bool ?? true
         showAllWorkshopContent = defaults.bool(forKey: "show_all_workshop_content")
-        nsfwEnabled = defaults.bool(forKey: "nsfw_enabled")
         githubToken = defaults.string(forKey: "github_token") ?? ""
         unsplashAccessKey = defaults.string(forKey: "unsplash_access_key") ?? ""
         pexelsApiKey = defaults.string(forKey: "pexels_api_key") ?? ""

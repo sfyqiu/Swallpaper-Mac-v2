@@ -514,6 +514,23 @@ struct WallpaperExploreContentView: View {
             }
         }
         .padding(.vertical, 2)
+
+        // 纯按钮（SFW/Sketchy/NSFW）— 小标签样式，放在分类标签末尾
+        if viewModel.currentSourceSupportsNSFW {
+            let purityChips: [(PurityFilter, String, String)] = [
+                (.sfw, "SFW", "43C463"),
+                (.sketchy, "Sketchy", "FFB347"),
+                (.nsfw, "NSFW", "FF5A7D"),
+            ]
+            ForEach(purityChips, id: \.0) { filter, title, hex in
+                TagChip(
+                    title: title,
+                    isSelected: isPuritySelected(filter)
+                ) {
+                    togglePurity(filter)
+                }
+            }
+        }
     }
 
     @ViewBuilder
@@ -1210,6 +1227,11 @@ private extension WallpaperExploreContentView {
 
     var activeFilterChips: [FilterChipData] {
         var chips: [FilterChipData] = []
+        if viewModel.currentSourceSupportsNSFW {
+            if viewModel.puritySFW { chips.append(.init(kind: .purity(.sfw), title: "SFW", accentHex: "43C463")) }
+            if viewModel.puritySketchy { chips.append(.init(kind: .purity(.sketchy), title: "Sketchy", accentHex: "FFB347")) }
+            if viewModel.purityNSFW { chips.append(.init(kind: .purity(.nsfw), title: "NSFW", accentHex: "FF5A7D")) }
+        }
         if let hex = viewModel.selectedColors.first,
            let preset = WallhavenAPI.colorPreset(for: hex) {
             chips.append(.init(kind: .color(hex), title: preset.displayName, subtitle: preset.displayHex, accentHex: hex))
@@ -1248,14 +1270,22 @@ private extension WallpaperExploreContentView {
     }
 
     func resetServerFilters() {
+        viewModel.puritySFW = true
+        viewModel.puritySketchy = false
+        viewModel.purityNSFW = false
         viewModel.selectedColors = []
         reloadData()
     }
 
     func removeFilter(_ chip: FilterChipData) {
         switch chip.kind {
+        case .purity(let purity):
+            switch purity {
+            case .sfw: viewModel.puritySFW = false
+            case .sketchy: viewModel.puritySketchy = false
+            case .nsfw: viewModel.purityNSFW = false
+            }
         case .color: viewModel.selectedColors = []
-        case .purity: break // purity filters no longer shown as chips
         }
         reloadData()
     }

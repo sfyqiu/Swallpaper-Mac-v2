@@ -1012,11 +1012,6 @@ class WallpaperViewModel: ObservableObject {
     }
 
     private func normalizedPurityMask() -> String {
-        // 全局 NSFW 开关：关闭时只返回 SFW，开启时按个人设置
-        guard UserDefaults.standard.bool(forKey: "nsfw_enabled") else {
-            return "100"
-        }
-
         // 位掩码格式: 1=包含, 0=排除
         // 第一位=SFW, 第二位=Sketchy, 第三位=NSFW
         let sfw = puritySFW ? 1 : 0
