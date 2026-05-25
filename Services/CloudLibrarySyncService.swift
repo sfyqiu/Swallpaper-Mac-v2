@@ -676,7 +676,7 @@ extension CloudLibrarySyncService {
             dimensionY: 1080,
             resolution: "1920x1080",
             ratio: "1.78",
-            fileSize: record.fileSize ?? fileSize,
+            fileSize: (record.fileSize ?? fileSize).flatMap(Int.init),
             fileType: localFileURL.pathExtension.lowercased() == "png" ? "image/png" : "image/jpeg",
             createdAt: dateStr,
             colors: [],
@@ -722,7 +722,7 @@ extension CloudLibrarySyncService {
             authorName: nil,
             authorSteamID: nil,
             authorAvatarURL: nil,
-            fileSize: record.fileSize ?? fileSize,
+            fileSize: (record.fileSize ?? fileSize).flatMap(Int.init),
             createdAt: record.createdAt,
             updatedAt: record.updatedAt
         )
