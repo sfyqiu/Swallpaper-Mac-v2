@@ -116,6 +116,9 @@ struct HomeContentView: View {
     @Binding var selectedMedia: MediaItem?
     /// 为 false 时不挂载重 UI（非当前 Tab），避免五 Tab 同时跑 ScrollView/轮播
     var isTabActive: Bool = true
+    /// 点击底部壁纸/视频栏目跳转到对应 Explore 页面
+    var onNavigateToWallpaperExplore: (() -> Void)?
+    var onNavigateToMediaExplore: (() -> Void)?
     @ObservedObject private var arcSettings = ArcBackgroundSettings.shared
 
     @State private var currentCarouselIndex = 0
@@ -140,6 +143,10 @@ struct HomeContentView: View {
     // 用户不感兴趣的轮播项（会话级，不持久化）
     @State private var dismissedHeroIDs: Set<String> = []
 
+    // 底部栏目随机打乱后的展示数据（每次加载刷新）
+    @State private var shuffledRecentWallpapers: [Wallpaper] = []
+    @State private var shuffledMediaItems: [MediaItem] = []
+
     // 更高更沉浸的轮播图，接近参考图比例
     private func heroHeight(for width: CGFloat) -> CGFloat {
         guard width > 0, width.isFinite, !width.isNaN, !width.isInfinite else { return 460 }
@@ -151,7 +158,7 @@ struct HomeContentView: View {
 
 
 
-    private let carouselAutoPlayInterval: TimeInterval = 8.0
+    private let carouselAutoPlayInterval: TimeInterval = 12.0
     private let carouselPageSnapDuration: TimeInterval = 0.32
     private let carouselDragThresholdRatio: CGFloat = 0.18
     private let contentHorizontalInset: CGFloat = 26
@@ -295,6 +302,7 @@ struct HomeContentView: View {
         }
         .onAppear {
             syncCarouselState(with: heroItems)
+            reshuffleShelves()
             if isTabActive {
                 startCarouselAutoPlay()
             }
@@ -309,6 +317,8 @@ struct HomeContentView: View {
                 guard !Task.isCancelled else { return }
                 // 独立获取 MotionBG 轮播数据（固定源，不跟随 explore 列表变化）
                 await refreshHeroMediaItems()
+                guard !Task.isCancelled else { return }
+                reshuffleShelves()
             }
         }
         .onDisappear {
@@ -342,6 +352,12 @@ struct HomeContentView: View {
             syncCarouselState(with: heroItems)
             stopCarouselAutoPlay()
             startCarouselAutoPlay()
+        }
+        .onChange(of: viewModel.latestWallpapers.count) { _, _ in
+            reshuffleShelves()
+        }
+        .onChange(of: mediaViewModel.homeItems.count) { _, _ in
+            reshuffleShelves()
         }
     }
 
@@ -453,22 +469,22 @@ struct HomeContentView: View {
             // 最新静态壁纸
             HomeShelfSection(
                 title: t("latestWallpaper"),
-                wallpapers: recentWallpapers,
+                wallpapers: shuffledRecentWallpapers,
                 atmospherePrimary: atmosphereController.primary,
                 atmosphereSecondary: atmosphereController.secondary,
-                onSelect: { wallpaper in
-                    selectedWallpaper = wallpaper
+                onSelect: { _ in
+                    onNavigateToWallpaperExplore?()
                 }
             )
 
             // 热门动态壁纸（使用独立的首页数据，不跟随 Explore 列表变化）
             HomeMediaSection(
                 title: t("hotDynamic"),
-                mediaItems: mediaViewModel.homeItems,
+                mediaItems: shuffledMediaItems,
                 atmospherePrimary: atmosphereController.primary,
                 atmosphereSecondary: atmosphereController.secondary,
-                onSelect: { item in
-                    selectedMedia = item
+                onSelect: { _ in
+                    onNavigateToMediaExplore?()
                 }
             )
         }
@@ -546,13 +562,6 @@ struct HomeContentView: View {
         }
     }
 
-    private var recentWallpapers: [Wallpaper] {
-        let latest = Array(viewModel.latestWallpapers.prefix(10))
-        if !latest.isEmpty {
-            return latest
-        }
-        return Array(viewModel.wallpapers.suffix(10))
-    }
 
     /// 独立刷新轮播专用的 MotionBG 数据（固定源，与 explore 列表解耦）
     /// 列表页不包含 previewVideoURL，需要对前几个 item 请求详情页补充
@@ -593,6 +602,17 @@ struct HomeContentView: View {
         stopCarouselAutoPlay()
         syncCarouselState(with: heroItems)
         startCarouselAutoPlay()
+    }
+
+    /// 随机打乱底部壁纸和视频栏目的展示顺序
+    private func reshuffleShelves() {
+        let latest = Array(viewModel.latestWallpapers.prefix(10))
+        if !latest.isEmpty {
+            shuffledRecentWallpapers = latest.shuffled()
+        } else {
+            shuffledRecentWallpapers = Array(viewModel.wallpapers.suffix(10)).shuffled()
+        }
+        shuffledMediaItems = mediaViewModel.homeItems.shuffled()
     }
 
     private func syncCarouselState(with items: [HeroItem]) {
