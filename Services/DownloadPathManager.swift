@@ -329,4 +329,5 @@ extension Notification.Name {
     static let appShouldReleaseForegroundMemory = Notification.Name("appShouldReleaseForegroundMemory")
     static let appDidReceiveMemoryPressure = Notification.Name("appDidReceiveMemoryPressure")
     static let switchToLibraryTab = Notification.Name("switchToLibraryTab")
+    static let wallpaperAPIKeyDidChange = Notification.Name("wallpaperAPIKeyDidChange")
 }

@@ -235,6 +235,14 @@ class WallpaperViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
+        // 监听 API Key 变更（用户在设置中输入/修改 API Key 后自动重新加载）
+        NotificationCenter.default.publisher(for: .wallpaperAPIKeyDidChange)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                Task { await self?.refresh() }
+            }
+            .store(in: &cancellables)
+
         // 启动网络监测
         networkMonitor.startMonitoring()
 

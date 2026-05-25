@@ -55,14 +55,51 @@ class SettingsViewModel: ObservableObject {
         async let r2 = PexelsService.shared.testConnection()
         async let r3 = CoverrService.shared.testConnection()
         async let r4 = NASAService.shared.testConnection()
+        async let r5 = testWallhavenConnection()
 
-        let (u, p, c, n) = await (r1, r2, r3, r4)
+        let (u, p, c, n, w) = await (r1, r2, r3, r4, r5)
         apiTestResults = [
+            ("Wallhaven", w.success, w.message),
             ("Unsplash", u.success, u.message),
             ("Pexels", p.success, p.message),
             ("Coverr", c.success, c.message),
             ("NASA APOD", n.success, n.message),
         ]
+    }
+
+    /// 测试 Wallhaven API 连通性（仅 HEAD/轻量请求，不消耗大量配额）
+    private func testWallhavenConnection() async -> (success: Bool, message: String) {
+        guard let url = WallhavenAPI.url(for: .search(WallhavenAPI.SearchParameters(perPage: 1))) else {
+            return (false, "Invalid URL")
+        }
+        let headers = WallhavenAPI.authenticationHeaders(apiKey: apiKey)
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "HEAD"
+        request.timeoutInterval = 8
+        for (key, value) in headers {
+            request.setValue(value, forHTTPHeaderField: key)
+        }
+
+        do {
+            let (_, response) = try await URLSession.shared.data(for: request)
+            if let httpResponse = response as? HTTPURLResponse {
+                if httpResponse.statusCode == 200 || httpResponse.statusCode == 204 {
+                    return (true, "OK (\(httpResponse.statusCode))")
+                } else if httpResponse.statusCode == 401 {
+                    return (false, "API Key 无效 (401)")
+                } else if httpResponse.statusCode == 429 {
+                    return (false, "请求过于频繁 (429)")
+                } else {
+                    return (false, "HTTP \(httpResponse.statusCode)")
+                }
+            }
+            return (false, "Invalid response")
+        } catch let error as URLError where error.code == .timedOut {
+            return (false, "连接超时")
+        } catch {
+            return (false, error.localizedDescription)
+        }
     }
 
     @Published var proxyEnabled = false { didSet { UserDefaults.standard.set(proxyEnabled, forKey: "proxy_enabled"); syncProxySettings() } }
@@ -156,6 +193,9 @@ class SettingsViewModel: ObservableObject {
 
             // 同步更新 WallpaperViewModel 的 API Key 缓存，确保实时生效
             WallpaperViewModel.updateSharedAPIKeyCache(trimmedValue)
+
+            // 通知壁纸视图重新加载（用户刚输入/修改了 API Key）
+            NotificationCenter.default.post(name: .wallpaperAPIKeyDidChange, object: nil)
         }
     }
 

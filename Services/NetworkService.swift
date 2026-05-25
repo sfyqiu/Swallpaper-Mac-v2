@@ -22,8 +22,9 @@ actor NetworkService {
         config.urlCache = URLCache.shared
         // 允许蜂窝网络访问
         config.allowsCellularAccess = true
-        // 等待网络连接
-        config.waitsForConnectivity = true
+        // 不等待网络连接，快速失败（配合 timeoutIntervalForRequest 在 30s 内报错）
+        // waitsForConnectivity=true 会导致 GFW 静默丢包时请求永久挂起
+        config.waitsForConnectivity = false
         // 启用后台会话
         config.isDiscretionary = false
 
@@ -39,7 +40,7 @@ actor NetworkService {
         config.timeoutIntervalForResource = 60
         config.urlCache = cache
         config.allowsCellularAccess = true
-        config.waitsForConnectivity = true
+        config.waitsForConnectivity = false
         config.isDiscretionary = false
 
         if enabled, !host.isEmpty, let portInt = Int(port), portInt > 0 {
