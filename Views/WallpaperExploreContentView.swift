@@ -477,6 +477,7 @@ struct WallpaperExploreContentView: View {
         }
     }
 
+    @ViewBuilder
     private var categorySection: some View {
         FlowLayout(spacing: 12) {
             if viewModel.currentSourceSupportsWallhavenCategories {
@@ -517,19 +518,9 @@ struct WallpaperExploreContentView: View {
 
         // 纯按钮（SFW/Sketchy/NSFW）— 小标签样式，放在分类标签末尾
         if viewModel.currentSourceSupportsNSFW {
-            let purityChips: [(PurityFilter, String, String)] = [
-                (.sfw, "SFW", "43C463"),
-                (.sketchy, "Sketchy", "FFB347"),
-                (.nsfw, "NSFW", "FF5A7D"),
-            ]
-            ForEach(purityChips, id: \.0) { filter, title, hex in
-                TagChip(
-                    title: title,
-                    isSelected: isPuritySelected(filter)
-                ) {
-                    togglePurity(filter)
-                }
-            }
+            TagChip(title: "SFW", isSelected: viewModel.puritySFW) { togglePurity(.sfw) }
+            TagChip(title: "Sketchy", isSelected: viewModel.puritySketchy) { togglePurity(.sketchy) }
+            TagChip(title: "NSFW", isSelected: viewModel.purityNSFW) { togglePurity(.nsfw) }
         }
     }
 
