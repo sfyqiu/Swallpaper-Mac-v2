@@ -131,6 +131,8 @@ class SettingsViewModel: ObservableObject {
     @Published var cloudSyncScanResult: CloudLibraryScanResult?
     @Published var isMigratingToCloud = false
     @Published var isScanningForRestore = false
+    @Published var isImportingFromCloud = false
+    @Published var cloudImportStatusMessage: String?
 
     func migrateToCloud() async {
         isMigratingToCloud = true
@@ -150,6 +152,40 @@ class SettingsViewModel: ObservableObject {
             cloudSyncService.status = .error(error.localizedDescription)
         }
         isScanningForRestore = false
+    }
+
+    /// 手动从云盘导入壁纸/视频到本地库
+    func importFromCloud() async {
+        isImportingFromCloud = true
+        cloudImportStatusMessage = nil
+        do {
+            let result = try await cloudSyncService.importMissingFromCloud { [weak self] progress in
+                Task { @MainActor [weak self] in
+                    switch progress {
+                    case .scanning:
+                        self?.cloudImportStatusMessage = "正在扫描云盘..."
+                    case .importing(let current, let total, let fileName):
+                        self?.cloudImportStatusMessage = "导入中 (\(current)/\(total)): \(fileName)"
+                    case .completed(let imported, let skipped, let errors):
+                        if imported > 0 {
+                            self?.cloudImportStatusMessage = "导入完成: \(imported) 项新增, \(skipped) 项已存在"
+                        } else if skipped > 0 {
+                            self?.cloudImportStatusMessage = "所有项目已是最新 (\(skipped) 项)"
+                        } else {
+                            self?.cloudImportStatusMessage = "云盘中无可导入内容"
+                        }
+                        if errors > 0 {
+                            self?.cloudImportStatusMessage? += " (\(errors) 项失败)"
+                        }
+                    }
+                }
+            }
+            // 刷新扫描结果
+            cloudSyncScanResult = try? await cloudSyncService.scanLibrary()
+        } catch {
+            cloudImportStatusMessage = "导入失败: \(error.localizedDescription)"
+        }
+        isImportingFromCloud = false
     }
 
     // MARK: - 调度器相关（延迟初始化，避免启动时阻塞）

@@ -484,6 +484,251 @@ final class CloudLibrarySyncService: ObservableObject {
     }
 }
 
+// MARK: - Cloud → Local Import
+
+extension CloudLibrarySyncService {
+
+    /// 云盘导入进度
+    enum ImportProgress {
+        case scanning
+        case importing(current: Int, total: Int, fileName: String)
+        case completed(imported: Int, skipped: Int, errors: Int)
+    }
+
+    /// 云盘导入结果
+    struct ImportResult {
+        var imported: Int = 0
+        var skipped: Int = 0
+        var errors: Int = 0
+        var importedWallpaperCount: Int = 0
+        var importedMediaCount: Int = 0
+    }
+
+    /// 将云盘中尚未在本地的壁纸/视频导入到本地库
+    /// - Parameter progressHandler: 进度回调（主线程）
+    /// - Returns: 导入结果统计
+    func importMissingFromCloud(
+        progressHandler: (@MainActor @Sendable (ImportProgress) -> Void)? = nil
+    ) async throws -> ImportResult {
+        guard isEnabled, let libURL = libraryURL else {
+            throw CloudSyncError.notEnabled
+        }
+
+        var result = ImportResult()
+
+        // 1. 确保本地目录结构存在
+        let dpManager = DownloadPathManager.shared
+        for dir in [dpManager.wallpapersFolderURL, dpManager.mediaFolderURL] {
+            if !fm.fileExists(atPath: dir.path) {
+                try fm.createDirectory(at: dir, withIntermediateDirectories: true)
+            }
+        }
+
+        // 2. 扫描云盘 metadata
+        let scanResult = try await scanLibrary()
+        let records = scanResult.records.filter { $0.status == .available }
+
+        guard !records.isEmpty else {
+            await MainActor.run { progressHandler?(.completed(imported: 0, skipped: 0, errors: 0)) }
+            return result
+        }
+
+        await MainActor.run { progressHandler?(.scanning) }
+
+        // 3. 获取本地已有的下载记录和本地文件列表，用于去重
+        let existingWallpaperIDs = Set(WallpaperLibraryService.shared.downloadedWallpapers.map(\.wallpaper.id))
+        let existingMediaPaths = Set(MediaLibraryService.shared.downloadedItems.map(\.localFilePath))
+
+        // 本地已存在文件的文件名集合（通过文件名去重，更准确）
+        let existingWallpaperFiles: Set<String> = {
+            guard fm.fileExists(atPath: dpManager.wallpapersFolderURL.path) else { return [] }
+            return Set((try? fm.contentsOfDirectory(atPath: dpManager.wallpapersFolderURL.path)) ?? [])
+        }()
+        let existingMediaFiles: Set<String> = {
+            guard fm.fileExists(atPath: dpManager.mediaFolderURL.path) else { return [] }
+            return Set((try? fm.contentsOfDirectory(atPath: dpManager.mediaFolderURL.path)) ?? [])
+        }()
+
+        let total = records.count
+
+        for (idx, record) in records.enumerated() {
+            let cloudFileURL = absoluteURL(for: record.relativeFilePath)
+            guard fm.fileExists(atPath: cloudFileURL.path) else {
+                result.errors += 1
+                continue
+            }
+
+            let fileName = cloudFileURL.lastPathComponent
+
+            await MainActor.run {
+                progressHandler?(.importing(current: idx + 1, total: total, fileName: fileName))
+            }
+
+            switch record.kind {
+            case .staticWallpaper:
+                // 去重：按 ID 或文件名
+                if existingWallpaperIDs.contains(record.id) || existingWallpaperFiles.contains(fileName) {
+                    result.skipped += 1
+                    continue
+                }
+
+                let destDir = dpManager.wallpapersFolderURL
+                let destURL = destDir.appendingPathComponent(fileName)
+
+                // 复制文件
+                do {
+                    if !fm.fileExists(atPath: destURL.path) {
+                        try fm.copyItem(at: cloudFileURL, to: destURL)
+                    }
+                    result.imported += 1
+                    result.importedWallpaperCount += 1
+
+                    // 注册到本地库
+                    let wallpaper = makeWallpaperFromCloudRecord(record, localFileURL: destURL)
+                    await MainActor.run {
+                        WallpaperLibraryService.shared.recordDownload(wallpaper, fileURL: destURL)
+                    }
+                } catch {
+                    result.errors += 1
+                }
+
+            case .videoWallpaper, .liveWallpaper:
+                if existingMediaPaths.contains(cloudFileURL.path) || existingMediaFiles.contains(fileName) {
+                    result.skipped += 1
+                    continue
+                }
+
+                let destDir = dpManager.mediaFolderURL
+                let destURL = destDir.appendingPathComponent(fileName)
+
+                do {
+                    if !fm.fileExists(atPath: destURL.path) {
+                        try fm.copyItem(at: cloudFileURL, to: destURL)
+                    }
+                    result.imported += 1
+                    result.importedMediaCount += 1
+
+                    let mediaItem = makeMediaItemFromCloudRecord(record, localFileURL: destURL)
+                    await MainActor.run {
+                        MediaLibraryService.shared.recordDownload(item: mediaItem, localFileURL: destURL)
+                    }
+                } catch {
+                    result.errors += 1
+                }
+
+            case .thumbnail:
+                result.skipped += 1
+            }
+        }
+
+        // 4. 更新 manifest
+        if var mf = manifest {
+            mf.updatedAt = Date()
+            mf.lastDeviceName = Host.current().localizedName ?? "Unknown Mac"
+            try? saveManifest(mf)
+        }
+
+        await MainActor.run {
+            progressHandler?(.completed(
+                imported: result.imported,
+                skipped: result.skipped,
+                errors: result.errors
+            ))
+        }
+
+        return result
+    }
+
+    /// 启动时检查：如果云盘已启用且有未导入的记录，自动导入
+    func autoImportOnStartupIfNeeded() {
+        guard isEnabled, libraryURL != nil else { return }
+
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                let result = try await self.importMissingFromCloud()
+                print("[CloudSync] Auto-import completed: imported=\(result.imported), skipped=\(result.skipped), errors=\(result.errors)")
+            } catch {
+                print("[CloudSync] Auto-import failed: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    // MARK: - Helpers
+
+    private func makeWallpaperFromCloudRecord(_ record: CloudLibraryRecord, localFileURL: URL) -> Wallpaper {
+        let fileName = localFileURL.lastPathComponent
+        let fileSize = (try? localFileURL.resourceValues(forKeys: [.fileSizeKey]))?.fileSize.flatMap(Int64.init)
+        let localPath = localFileURL.path
+        let dateStr = ISO8601DateFormatter().string(from: record.createdAt)
+
+        return Wallpaper(
+            id: record.id,
+            url: record.remoteURL ?? "file://\(localPath)",
+            shortUrl: nil,
+            views: 0,
+            favorites: 0,
+            downloads: nil,
+            source: record.source,
+            purity: "sfw",
+            category: "general",
+            dimensionX: 1920,
+            dimensionY: 1080,
+            resolution: "1920x1080",
+            ratio: "1.78",
+            fileSize: record.fileSize ?? fileSize,
+            fileType: localFileURL.pathExtension.lowercased() == "png" ? "image/png" : "image/jpeg",
+            createdAt: dateStr,
+            colors: [],
+            path: localPath,
+            thumbs: Wallpaper.Thumbs(
+                large: localPath,
+                original: localPath,
+                small: localPath
+            ),
+            tags: record.title.map { [Wallpaper.Tag(id: 0, name: $0, alias: nil)] },
+            uploader: nil
+        )
+    }
+
+    private func makeMediaItemFromCloudRecord(_ record: CloudLibraryRecord, localFileURL: URL) -> MediaItem {
+        let fileSize = (try? localFileURL.resourceValues(forKeys: [.fileSizeKey]))?.fileSize.flatMap(Int64.init)
+        let ext = localFileURL.pathExtension.lowercased()
+        let isVideo = Set(["mp4", "mov", "webm", "m4v", "mkv"]).contains(ext)
+        let fileName = localFileURL.deletingPathExtension().lastPathComponent
+        let localPath = localFileURL.path
+        let localFileURLForThumb = localFileURL
+
+        return MediaItem(
+            slug: record.id,
+            title: record.title ?? fileName,
+            pageURL: localFileURLForThumb,
+            thumbnailURL: localFileURLForThumb,
+            resolutionLabel: "1920x1080",
+            collectionTitle: nil,
+            summary: nil,
+            previewVideoURL: isVideo ? localFileURLForThumb : nil,
+            posterURL: nil,
+            tags: [],
+            exactResolution: "1920x1080",
+            durationSeconds: nil,
+            downloadOptions: [],
+            sourceName: record.source,
+            isAnimatedImage: nil,
+            subscriptionCount: nil,
+            favoriteCount: nil,
+            viewCount: nil,
+            ratingScore: nil,
+            authorName: nil,
+            authorSteamID: nil,
+            authorAvatarURL: nil,
+            fileSize: record.fileSize ?? fileSize,
+            createdAt: record.createdAt,
+            updatedAt: record.updatedAt
+        )
+    }
+}
+
 // MARK: - Errors
 
 enum CloudSyncError: Error, LocalizedError {

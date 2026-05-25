@@ -647,6 +647,8 @@ private struct CloudSyncSettingsTab: View {
     private func handleEnable(_ provider: CloudProvider, rootURL: URL) {
         do {
             try viewModel.cloudSyncService.enable(provider: provider, rootURL: rootURL)
+            // 启用后自动触发导入
+            Task { await viewModel.importFromCloud() }
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -657,6 +659,8 @@ private struct CloudSyncSettingsTab: View {
             do {
                 let url = try await viewModel.cloudSyncService.chooseCustomFolder()
                 try viewModel.cloudSyncService.enable(provider: provider, rootURL: url)
+                // 启用后自动触发导入
+                await viewModel.importFromCloud()
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -748,6 +752,20 @@ private struct CloudSyncSettingsTab: View {
                 }
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(Color(hex: "54AEFF"))
+
+                Button(viewModel.isImportingFromCloud ? "导入中..." : "从云盘导入到本地") {
+                    Task { await viewModel.importFromCloud() }
+                }
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Color(hex: "40C8A0"))
+                .disabled(viewModel.isImportingFromCloud)
+
+                if let statusMsg = viewModel.cloudImportStatusMessage {
+                    Text(statusMsg)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 16)
+                }
 
                 Button("切换到其他云盘") {
                     viewModel.cloudSyncService.disable()

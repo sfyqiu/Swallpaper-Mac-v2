@@ -370,6 +370,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                                         let vm = SettingsViewModel()
                                         vm.restoreSavedSettings()
                                         self?.settingsViewModel = vm
+
+                                        // 云盘同步库恢复后，自动检查并导入云盘中的壁纸/视频
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                            CloudLibrarySyncService.shared.autoImportOnStartupIfNeeded()
+                                        }
                                     }
                                 }
                             }
